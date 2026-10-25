@@ -1,0 +1,10 @@
+{
+  "name": "mcesparreguera-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs && python3 -m http.server 8080 -d dist"
+  },
+  "engines": { "node": ">=18" }
+}
