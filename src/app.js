@@ -78,15 +78,19 @@
     lb.className = "lightbox"; lb.hidden = true;
     lb.innerHTML = '<img alt=""><button class="lx" type="button" aria-label="Cerrar">✕</button><button class="gnav prev" type="button" aria-label="Foto anterior">‹</button><button class="gnav next" type="button" aria-label="Foto siguiente">›</button><span class="gcount"></span>';
     document.body.append(lb);
+    // fotos: [{ s: foto grande, ss: srcset con las versiones reducidas }]
+    const load = (img, f) => { img.srcset = f.ss; img.src = f.s; };
     const show = n => {
       i = (n + fotos.length) % fotos.length;
-      if (main) main.src = fotos[i];
-      lb.querySelector("img").src = fotos[i];
+      if (main) load(main, fotos[i]);
+      lb.querySelector("img").src = fotos[i].s;
       lb.querySelector(".gcount").textContent = `${i + 1} / ${fotos.length}`;
       if ($("gi")) $("gi").textContent = i + 1;
       thumbs.forEach((t, k) => t.setAttribute("aria-current", k === i));
       thumbs[i]?.scrollIntoView({ block: "nearest", inline: "nearest" });
-      [fotos[(i + 1) % fotos.length], fotos[(i - 1 + fotos.length) % fotos.length]].forEach(u => { new Image().src = u; });
+      [fotos[(i + 1) % fotos.length], fotos[(i - 1 + fotos.length) % fotos.length]].forEach(f => {
+        const im = new Image(); if (main) im.sizes = main.sizes; load(im, f);
+      });
     };
     const open = () => { if (!fotos.length) return; show(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lx").focus(); };
     const close = () => { lb.hidden = true; document.body.style.overflow = ""; };

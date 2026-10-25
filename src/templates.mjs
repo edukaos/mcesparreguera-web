@@ -23,8 +23,19 @@ const SIL = {
   van: '<svg class="sil" viewBox="0 0 200 80" fill="currentColor" aria-hidden="true"><path d="M8 62V30c0-10 6-18 16-18h116c8 0 13 3 17 9l15 18 14 3c4 1 6 4 6 8v12Z"/><circle cx="48" cy="64" r="12"/><circle cx="156" cy="64" r="12"/></svg>',
 };
 const silFor = c => ({ suv: "suv", furgoneta: "van", camper: "van" })[c.sil] || "berlina";
-const pic = (c, eager) => c.fotos[0]
-  ? `<img src="${esc(c.fotos[0])}" alt="${esc(`${title(c)} ${c.version} ${c.year ?? ""}`)}"${eager ? "" : ' loading="lazy"'}>`
+// Foto con srcset WebP y tamaño fijo (evita saltos de maquetación). im viene de build.mjs (c.img).
+const SIZES = {
+  card: "(max-width:640px) calc(100vw - 32px), (max-width:980px) 50vw, 400px",
+  half: "(max-width:980px) calc(100vw - 32px), 620px",
+  gal: "(max-width:980px) calc(100vw - 32px), 760px",
+  thumb: "84px",
+};
+const imgTag = (im, alt, { sizes = SIZES.half, eager = false } = {}) => !im ? "" :
+  `<img src="${esc(im.src)}"${im.srcset ? ` srcset="${esc(im.srcset)}" sizes="${sizes}"` : ""}${im.w ? ` width="${im.w}" height="${im.h}"` : ""} alt="${esc(alt)}"${eager ? ' fetchpriority="high"' : ' loading="lazy"'} decoding="async">`;
+const carAlt = c => `${title(c)} ${c.version}${c.year ? ` de ${c.year}` : ""} en venta en Esparreguera`;
+const img0 = c => c.img?.[0] || (c.fotos[0] && { src: c.fotos[0] });
+const pic = (c, eager, sizes = SIZES.card) => img0(c)
+  ? imgTag(img0(c), carAlt(c), { eager, sizes })
   : `${SIL[silFor(c)]}<span class="soon">Foto próximamente</span>`;
 const dgt = d => {
   const txt = { H: "HIST" }[d] || d || "¿?";
@@ -45,9 +56,28 @@ function card(c) {
     </div></article>`;
 }
 
-function layout({ pageTitle, description, path, body, jsonld, image }) {
+const abs = u => u && (u.startsWith("/") ? cfg.siteUrl + u : u);
+// JSON-LD seguro dentro de <script> (un "</script>" en una descripción no rompe la página)
+const ld = data => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
+const BIZ_ID = `${cfg.siteUrl}/#negocio`;
+const address = { "@type": "PostalAddress", streetAddress: cfg.direccion || undefined, addressLocality: "Esparreguera", addressRegion: "Barcelona", postalCode: cfg.cp || undefined, addressCountry: "ES" };
+const business = cars => ({
+  "@type": "AutoDealer", "@id": BIZ_ID, name: `${cfg.nombre} Esparreguera`, alternateName: "MC Esparreguera",
+  description: `Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, grúa, rent a car y representante oficial de Aixam.`,
+  url: `${cfg.siteUrl}/`, logo: `${cfg.siteUrl}/img/icon-512.png`, image: abs(cars.find(c => c.fotos[0])?.img?.[0]?.orig || cars.find(c => c.fotos[0])?.fotos[0]) || `${cfg.siteUrl}/img/logo.png`,
+  telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde), address,
+  areaServed: [{ "@type": "City", name: "Esparreguera" }, { "@type": "AdministrativeArea", name: "Baix Llobregat" }, { "@type": "Country", name: "España" }],
+  priceRange: cars.length ? `${eur(Math.min(...cars.map(c => c.precio)))} - ${eur(Math.max(...cars.map(c => c.precio)))}` : undefined,
+  currenciesAccepted: "EUR", paymentAccepted: "Efectivo, transferencia, financiación",
+  openingHoursSpecification: cfg.horarioSchema?.length ? cfg.horarioSchema.map(([days, opens, closes]) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: days, opens, closes })) : undefined,
+  contactPoint: { "@type": "ContactPoint", telephone: `+34${cfg.whatsapp.replace(/^34/, "")}`, contactType: "sales", availableLanguage: ["es", "ca"] },
+  knowsAbout: ["Coches de segunda mano", "Coches sin carnet Aixam", "Gestoría de tráfico", "Grúa", "Alquiler de coches"],
+  sameAs: [`https://www.instagram.com/${cfg.instagram}/`],
+});
+
+function layout({ pageTitle, description, path, body, jsonld, image, ogType = "website", extraHead = "" }) {
   const url = cfg.siteUrl + path;
-  const abs = u => u && (u.startsWith("/") ? cfg.siteUrl + u : u);
+  const ogImg = image && (image.orig || image.src);
   return `<!doctype html>
 <html lang="es">
 <head>
@@ -55,30 +85,42 @@ function layout({ pageTitle, description, path, body, jsonld, image }) {
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>${esc(pageTitle)}</title>
 <meta name="description" content="${esc(description)}">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="${url}">
 <meta name="theme-color" content="#2f3c45">
-<meta property="og:type" content="website">
+<meta name="geo.region" content="ES-CT">
+<meta name="geo.placename" content="Esparreguera">
+<meta property="og:type" content="${ogType}">
+<meta property="og:site_name" content="${esc(cfg.nombre)} Esparreguera">
 <meta property="og:locale" content="es_ES">
 <meta property="og:title" content="${esc(pageTitle)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:url" content="${url}">
-${image ? `<meta property="og:image" content="${esc(abs(image))}">` : ""}
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito+Sans:opsz,wght@6..12,400;6..12,500;6..12,600;6..12,700;6..12,800&display=swap">
+${ogImg ? `<meta property="og:image" content="${esc(abs(ogImg))}">${image.w ? `\n<meta property="og:image:width" content="${image.w}">\n<meta property="og:image:height" content="${image.h}">` : ""}\n<meta property="og:image:alt" content="${esc(image.alt || pageTitle)}">` : ""}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${esc(pageTitle)}">
+<meta name="twitter:description" content="${esc(description)}">
+${ogImg ? `<meta name="twitter:image" content="${esc(abs(ogImg))}">` : ""}
+${extraHead}
+<link rel="icon" href="/favicon.ico" sizes="32x32 48x48">
+<link rel="icon" href="/img/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="preload" href="/fonts/nunito-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
-<script type="application/ld+json">${JSON.stringify(jsonld)}</script>
+${ld(jsonld)}
 </head>
 <body>
 <div class="util g"><div class="in">
   <span><i class="dot"></i><b>Transferencia incluida</b>&nbsp;en todos los coches</span>
   <span class="hide-s">Entrega en toda España · Representante oficial Aixam</span>
-  <span>Llámanos: <b>${TEL}</b></span>
+  <span>Llámanos: <a href="tel:+34${cfg.telefono}"><b>${TEL}</b></a></span>
 </div></div>
 <header class="top g"><div class="in">
-  <a class="brand" href="/"><img src="/img/logo.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
+  <a class="brand" href="/"><img src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
   <nav class="main" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#vender">Vender mi coche</a><a href="/#financiacion">Financiación</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
-  <a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener">${I.wa}<span>Escríbenos</span></a>
+  <a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">${I.wa}<span>Escríbenos</span></a>
 </div></header>
 <main>
 ${body}
@@ -119,10 +161,10 @@ export function homePage(cars) {
   </div>
   <div class="visual">
     <div class="blob"></div>
-    <div class="main">${heroCar.fotos[0] ? `<img src="${esc(heroCar.fotos[0])}" alt="${esc(title(heroCar))} en venta en ${esc(cfg.nombre)}">` : ""}</div>
+    <div class="main">${imgTag(img0(heroCar), carAlt(heroCar), { eager: true, sizes: SIZES.half })}</div>
     <div class="year-badge"><span><b>+${years}</b>años<br>contigo</span></div>
     <div class="float f1"><span class="ic">${I.shield}</span><span><b>Revisado y garantizado</b><small>Antes de entregarlo</small></span></div>
-    ${nuevo ? `<a class="float f2" href="/coches/${nuevo.id}/"><img src="${esc(nuevo.fotos[0])}" alt=""><span><small>Recién llegado</small><b>${esc(title(nuevo))}</b><span class="pr">${eur(nuevo.precio)}</span></span></a>` : ""}
+    ${nuevo ? `<a class="float f2" href="/coches/${nuevo.id}/">${imgTag(img0(nuevo), "", { sizes: SIZES.thumb })}<span><small>Recién llegado</small><b>${esc(title(nuevo))}</b><span class="pr">${eur(nuevo.precio)}</span></span></a>` : ""}
   </div>
 </div></section>
 
@@ -131,6 +173,7 @@ export function homePage(cars) {
 </div></div>
 
 <section class="sec g"><div class="in">
+  <h2 class="sr-only">Por qué comprar tu coche en ${esc(cfg.nombre)}</h2>
   <div class="perks">
     <div class="perk"><span class="ic">${I.wrench}</span><h3>Pasa por taller</h3><p>Revisamos mecánica, frenos y neumáticos antes de ponerlo a la venta.</p></div>
     <div class="perk"><span class="ic">${I.doc}</span><h3>Papeles incluidos</h3><p>Transferencia, informe de la DGT y cambio de nombre corren de nuestra cuenta.</p></div>
@@ -164,7 +207,7 @@ export function homePage(cars) {
 
 ${star ? `<section class="g"><div class="in">
   <div class="spot">
-    <div class="ph"><img src="${esc(star.fotos[0])}" alt="${esc(`${title(star)} ${star.year}`)}" loading="lazy"></div>
+    <div class="ph">${imgTag(img0(star), carAlt(star))}</div>
     <div class="bd">
       <p class="eyebrow">La joya del mes</p>
       <h2>${esc(title(star))}, de ${star.year}</h2>
@@ -202,7 +245,7 @@ ${star ? `<section class="g"><div class="in">
 
 <section class="sec g" id="vender"><div class="in">
   <div class="sell">
-    <div class="ph">${sellCar.fotos[0] ? `<img src="${esc(sellCar.fotos[0])}" alt="" loading="lazy">` : ""}<div class="tag"><b>Tasación en 24 horas</b>Sin compromiso y sin moverte de casa.</div></div>
+    <div class="ph">${imgTag(img0(sellCar), "")}<div class="tag"><b>Tasación en 24 horas</b>Sin compromiso y sin moverte de casa.</div></div>
     <form id="tas">
       <p class="eyebrow">Vende o cambia tu coche</p>
       <h2>¿Cuánto vale tu coche?</h2>
@@ -263,29 +306,35 @@ ${star ? `<section class="g"><div class="in">
   </div>
 </div></section>`;
 
+  const faq = [...body.matchAll(/<details[^>]*><summary>(.*?)<\/summary><p>(.*?)<\/p><\/details>/g)];
   const jsonld = {
-    "@context": "https://schema.org", "@type": "AutoDealer", name: `${cfg.nombre} Esparreguera`,
-    url: cfg.siteUrl, telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde),
-    address: { "@type": "PostalAddress", streetAddress: cfg.direccion || undefined, addressLocality: "Esparreguera", addressRegion: "Barcelona", addressCountry: "ES" },
-    sameAs: [`https://www.instagram.com/${cfg.instagram}/`],
+    "@context": "https://schema.org",
+    "@graph": [
+      business(cars),
+      { "@type": "WebSite", "@id": `${cfg.siteUrl}/#web`, url: `${cfg.siteUrl}/`, name: `${cfg.nombre} Esparreguera`, inLanguage: "es-ES", publisher: { "@id": BIZ_ID } },
+      { "@type": "ItemList", name: "Coches de segunda mano en venta", numberOfItems: cars.length,
+        itemListElement: cars.map((c, i) => ({ "@type": "ListItem", position: i + 1, url: `${cfg.siteUrl}/coches/${c.id}/`, name: `${title(c)} ${c.version}` })) },
+      { "@type": "FAQPage", mainEntity: faq.map(([, q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) },
+    ],
   };
   return layout({
     pageTitle: "Coches de segunda mano en Esparreguera | Multiservice Car",
-    description: `${cars.length} coches de ocasión revisados, con transferencia incluida, financiación y entrega en toda España. Negocio familiar en Esparreguera desde ${cfg.desde}.`,
-    path: "/", body, jsonld, image: heroCar.fotos[0],
+    description: `${cars.length} coches de ocasión revisados en Esparreguera (Barcelona), con transferencia incluida, garantía, financiación y entrega en toda España. Desde ${cfg.desde}.`,
+    path: "/", body, jsonld, image: img0(heroCar) && { ...img0(heroCar), alt: carAlt(heroCar) },
   });
 }
 
 export function carPage(c, cars) {
   const sim = cars.filter(x => x !== c).sort((a, b) => Math.abs(a.precio - c.precio) - Math.abs(b.precio - c.precio)).slice(0, 4);
   const dgtTxt = { C: "C (verde)", B: "B (amarilla)", ECO: "ECO", "0": "0 emisiones", H: "Histórico" }[c.etiqueta] || "Consultar";
-  const thumbs = c.fotos.length > 1 ? `<div class="thumbs">${c.fotos.map((f, i) => `<button type="button" data-i="${i}" aria-current="${i === 0}" aria-label="Foto ${i + 1}"><img src="${esc(f)}" alt="" loading="lazy"></button>`).join("")}</div>` : "";
+  const ims = c.img || c.fotos.map(src => ({ src }));
+  const thumbs = c.fotos.length > 1 ? `<div class="thumbs">${ims.map((im, i) => `<button type="button" data-i="${i}" aria-current="${i === 0}" aria-label="Foto ${i + 1}">${imgTag(im, "", { sizes: SIZES.thumb })}</button>`).join("")}</div>` : "";
   const body = `
 <div class="g"><div class="in">
   <p class="crumbs"><a href="/">Inicio</a> / <a href="/#stock">Coches</a> / <span>${esc(title(c))}</span></p>
   <div class="det">
     <div>
-      <div class="gal" data-fotos='${esc(JSON.stringify(c.fotos))}'><div class="mainph" id="gmain">${pic(c, true)}<span class="pill">${c.year ?? ""}</span>${dgt(c.etiqueta)}${c.fotos.length > 1 ? `
+      <div class="gal" data-fotos='${esc(JSON.stringify(ims.map(im => ({ s: im.src, ss: im.srcset || "" }))))}'><div class="mainph" id="gmain">${pic(c, true, SIZES.gal)}<span class="pill">${c.year ?? ""}</span>${dgt(c.etiqueta)}${c.fotos.length > 1 ? `
         <button class="gnav prev" type="button" aria-label="Foto anterior">‹</button><button class="gnav next" type="button" aria-label="Foto siguiente">›</button>
         <span class="gcount"><b id="gi">1</b> / ${c.fotos.length}</span>` : ""}${c.fotos[0] ? '<button class="gzoom" type="button" aria-label="Ver en pantalla completa">⤢</button>' : ""}</div>${thumbs}
         <p class="note">${c.fotos[0] ? "Más fotos y vídeo por WhatsApp, te los mandamos al momento." : "Pídenos las fotos por WhatsApp y te las mandamos al momento."}</p></div>
@@ -299,7 +348,7 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
       </div>
       ${c.descripcion ? `<div style="margin-top:28px"><h2 style="font-size:1.5rem;margin-bottom:10px">Equipamiento y estado</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
-      <div class="incl"><h3>Incluido en el precio</h3><ul><li>Transferencia y cambio de nombre</li><li>Informe de la DGT</li><li>Revisión en taller</li><li>12 meses de garantía legal</li></ul></div>
+      <div class="incl"><h2>Incluido en el precio</h2><ul><li>Transferencia y cambio de nombre</li><li>Informe de la DGT</li><li>Revisión en taller</li><li>12 meses de garantía legal</li></ul></div>
     </div>
     <aside class="buy">
       <span class="eyebrow">${c.estado === "reservado" ? "Reservado" : "Precio al contado"}</span>
@@ -314,17 +363,61 @@ export function carPage(c, cars) {
   </div>
   <section class="similar" style="padding-block:40px 20px"><h2>También te pueden interesar</h2><div class="grid">${sim.map(card).join("")}</div></section>
 </div></div>`;
+  const url = `${cfg.siteUrl}/coches/${c.id}/`;
+  const desc = `${title(c)} ${c.version}${c.year ? `, ${c.year}` : ""}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)} o desde ${cuota(c.precio)} €/mes. Transferencia y garantía incluidas. En Esparreguera (Barcelona).`;
   const jsonld = {
-    "@context": "https://schema.org", "@type": "Car", name: `${title(c)} ${c.version}`, brand: { "@type": "Brand", name: c.marca },
-    model: c.modelo, vehicleModelDate: String(c.year ?? ""), fuelType: c.combustible, vehicleTransmission: c.cambio, bodyType: c.carroceria,
-    mileageFromOdometer: c.km != null ? { "@type": "QuantitativeValue", value: c.km, unitCode: "KMT" } : undefined,
-    image: c.fotos.map(f => f.startsWith("/") ? cfg.siteUrl + f : f),
-    offers: { "@type": "Offer", price: c.precio, priceCurrency: "EUR", itemCondition: "https://schema.org/UsedCondition",
-      availability: c.estado === "reservado" ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock" },
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Car", "@id": `${url}#coche`, url, name: `${title(c)} ${c.version}`.trim(), sku: c.id,
+        description: c.descripcion || desc, brand: { "@type": "Brand", name: c.marca }, manufacturer: { "@type": "Organization", name: c.marca },
+        model: c.modelo, vehicleConfiguration: c.version || undefined, vehicleModelDate: c.year ? String(c.year) : undefined, productionDate: c.year ? String(c.year) : undefined,
+        itemCondition: "https://schema.org/UsedCondition", fuelType: c.combustible || undefined, vehicleTransmission: c.cambio || undefined, bodyType: c.carroceria || undefined,
+        vehicleEngine: c.cv ? { "@type": "EngineSpecification", enginePower: { "@type": "QuantitativeValue", value: c.cv, unitText: "CV" }, fuelType: c.combustible || undefined } : undefined,
+        mileageFromOdometer: c.km != null ? { "@type": "QuantitativeValue", value: c.km, unitCode: "KMT" } : undefined,
+        image: ims.length ? ims.map(im => abs(im.orig || im.src)) : undefined,
+        offers: { "@type": "Offer", url, price: c.precio, priceCurrency: "EUR", itemCondition: "https://schema.org/UsedCondition",
+          availability: c.estado === "reservado" ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock",
+          seller: { "@type": "AutoDealer", "@id": BIZ_ID, name: `${cfg.nombre} Esparreguera`, telephone: `+34${cfg.telefono}`, address },
+          areaServed: { "@type": "Country", name: "España" } } },
+      { "@type": "BreadcrumbList", itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Inicio", item: `${cfg.siteUrl}/` },
+        { "@type": "ListItem", position: 2, name: "Coches", item: `${cfg.siteUrl}/#stock` },
+        { "@type": "ListItem", position: 3, name: title(c), item: url } ] },
+    ],
   };
+  // Título: el más completo que quepa en ~60 caracteres antes de la marca.
+  const tail = `${c.year ? ` ${c.year}` : ""} · ${eur(c.precio)}`;
+  const pageTitle = [`${title(c)} ${c.version}${tail}`, `${title(c)}${tail} en Esparreguera`, `${title(c)}${tail}`].find(t => t.length <= 42) || `${title(c)}${tail}`;
   return layout({
-    pageTitle: `${title(c)} ${c.version} ${c.year ?? ""} de segunda mano · ${eur(c.precio)} | Multiservice Car`,
-    description: `${title(c)} ${c.version}, ${c.year}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)} o desde ${cuota(c.precio)} €/mes. Transferencia incluida.`,
-    path: `/coches/${c.id}/`, body, jsonld, image: c.fotos[0],
+    pageTitle: `${pageTitle} | ${cfg.nombre}`, description: desc,
+    path: `/coches/${c.id}/`, body, jsonld, ogType: "product",
+    extraHead: `<meta property="product:price:amount" content="${c.precio}">\n<meta property="product:price:currency" content="EUR">\n<meta property="product:condition" content="used">\n<meta property="product:availability" content="${c.estado === "reservado" ? "pending" : "in stock"}">`,
+    image: img0(c) && { ...img0(c), alt: carAlt(c) },
   });
+}
+
+// Página de redirección para URLs antiguas (GitHub Pages no tiene redirecciones 301; Google trata
+// un meta refresh inmediato con canonical como redirección permanente).
+export function redirectPage(to, base = "") {
+  const url = cfg.siteUrl + to;
+  to = base + to;
+  return `<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>${esc(cfg.nombre)}</title>
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="${url}">
+<meta http-equiv="refresh" content="0; url=${to}">
+<script>location.replace(${JSON.stringify(to)})</script>
+</head><body><p><a href="${to}">Ir a ${esc(cfg.nombre)}</a></p></body></html>`;
+}
+
+export function notFoundPage(cars) {
+  const body = `
+<section class="sec g"><div class="in" style="text-align:center;max-width:640px">
+  <p class="eyebrow">Error 404</p>
+  <h1 style="margin:14px 0">Este coche ya no está aquí</h1>
+  <p class="lead" style="margin:0 auto 24px">Puede que ya se haya vendido o que el enlace esté mal. Mira lo que tenemos hoy en stock o escríbenos y te ayudamos.</p>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a class="btn a" href="/#stock">Ver los ${cars.length} coches en venta</a><a class="btn o" href="${wa("Hola, buscaba un coche en vuestra web y no lo encuentro")}" target="_blank" rel="noopener">${I.wa}Preguntar por WhatsApp</a></div>
+</div></section>`;
+  return layout({ pageTitle: `Página no encontrada | ${cfg.nombre}`, description: "La página que buscas no existe.", path: "/404.html", body, jsonld: { "@context": "https://schema.org", ...business(cars) } })
+    .replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex,follow">').replace(/<link rel="canonical"[^>]*>\n/, "");
 }

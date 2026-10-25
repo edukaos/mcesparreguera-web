@@ -24,12 +24,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      # Fotos WebP ya generadas en builds anteriores (así el build horario tarda segundos)
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: img-${{ hashFiles('fotos/**') }}-${{ github.run_id }}
+          restore-keys: img-
       - id: pages
         uses: actions/configure-pages@v5
       - run: node build.mjs
         env:
           SHEET_CSV_URL: ${{ vars.SHEET_CSV_URL }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
