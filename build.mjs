@@ -5,6 +5,9 @@ import { createHash } from "node:crypto";
 import cfg from "./config.mjs";
 
 const DIST = "dist";
+// Ruta base cuando la web vive en una subcarpeta (p. ej. GitHub Pages sin dominio propio: /mcesparreguera-web).
+const BASE = (process.env.BASE_PATH || "").replace(/\/$/, "");
+const withBase = html => html.replace(/(href|src|data-src)="\/(?!\/)/g, `$1="${BASE}/`);
 
 // ---------- Datos ----------
 function parseCsv(text) {
@@ -387,10 +390,10 @@ const cars = await loadCars();
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
 await localizePhotos(cars);
-await writeFile(`${DIST}/index.html`, homePage(cars));
+await writeFile(`${DIST}/index.html`, withBase(homePage(cars)));
 for (const c of cars) {
   await mkdir(`${DIST}/coches/${c.id}`, { recursive: true });
-  await writeFile(`${DIST}/coches/${c.id}/index.html`, carPage(c));
+  await writeFile(`${DIST}/coches/${c.id}/index.html`, withBase(carPage(c)));
 }
 await copyFile("src/styles.css", `${DIST}/styles.css`);
 await copyFile("src/app.js", `${DIST}/app.js`);
