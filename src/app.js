@@ -1,68 +1,76 @@
 // Interacción de la web: filtros del stock, calculadora de cuota, tasación por WhatsApp y galería.
 (() => {
   const $ = id => document.getElementById(id);
-  const WA = document.querySelector(".fab")?.href.match(/wa\.me\/(\d+)/)?.[1];
+  const WA = document.querySelector(".mbar .btn.w, header .btn.w")?.href.match(/wa\.me\/(\d+)/)?.[1];
+  const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
   const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0, useGrouping: "always" }) + " €";
 
-  // Filtros
+  // Filtros del stock
   const grid = $("grid");
-  if (grid) {
-    const cards = [...grid.querySelectorAll(".car")];
-    const chips = new Set();
+  if (grid && $("sort")) {
+    const cards = [...grid.querySelectorAll(".card")];
+    const st = { budget: "", tipo: "", marca: "", sort: "rel" };
+    const press = (attr, val) => document.querySelectorAll(`[data-${attr}]`).forEach(b => b.setAttribute("aria-pressed", b.dataset[attr] === val));
     const render = () => {
-      const q = $("q").value.trim().toLowerCase(), pmax = +$("pmax").value || Infinity;
-      const fuel = $("fuel").value, body = $("body").value, sort = $("sort").value;
       const ok = cards.filter(c => {
-        const d = c.dataset;
-        return (!q || d.marca.includes(q)) && +d.precio <= pmax && (!fuel || d.fuel === fuel) && (!body || d.body === body) &&
-          (!chips.has("auto") || d.gear === "Automático") && (!chips.has("eco") || d.dgt === "ECO" || d.dgt === "0") &&
-          (!chips.has("k10") || +d.precio < 10000);
+        const d = c.dataset, p = +d.precio;
+        if (st.marca && d.marca !== st.marca) return false;
+        if (st.tipo && d.tipo !== st.tipo) return false;
+        if (st.budget) { const [a, b] = st.budget.split("-").map(Number); if (p < a || p >= b) return false; }
+        return true;
       });
       const by = {
         pa: (a, b) => a.dataset.precio - b.dataset.precio, pd: (a, b) => b.dataset.precio - a.dataset.precio,
         km: (a, b) => (+a.dataset.km || 9e9) - (+b.dataset.km || 9e9), yr: (a, b) => b.dataset.year - a.dataset.year,
-      }[sort];
-      const order = by ? ok.slice().sort(by) : cards.filter(c => ok.includes(c));
+      }[st.sort];
+      (by ? ok.slice().sort(by) : ok).forEach(c => grid.insertBefore(c, $("empty")));
       cards.forEach(c => { c.hidden = !ok.includes(c); });
-      order.forEach(c => grid.insertBefore(c, $("empty")));
       $("empty").hidden = ok.length > 0;
-      $("count").textContent = `${ok.length} de ${cards.length} coches`;
+      $("count").textContent = `${ok.length} ${ok.length === 1 ? "coche" : "coches"}`;
+      press("budget", st.budget); press("tipo", st.tipo); press("brand", st.marca);
     };
-    ["q", "pmax", "fuel", "body", "sort"].forEach(id => $(id).addEventListener("input", render));
-    $("search").addEventListener("submit", e => { e.preventDefault(); render(); $("stock").scrollIntoView({ behavior: "smooth" }); });
-    document.querySelectorAll("[data-chip]").forEach(b => b.addEventListener("click", () => {
-      const k = b.dataset.chip; chips.has(k) ? chips.delete(k) : chips.add(k);
-      b.setAttribute("aria-pressed", chips.has(k)); render();
-    }));
+    document.addEventListener("click", e => {
+      const b = e.target.closest("[data-budget],[data-tipo],[data-brand]");
+      if (!b) return;
+      if ("budget" in b.dataset) st.budget = b.dataset.budget;
+      if ("tipo" in b.dataset) st.tipo = b.dataset.tipo;
+      if ("brand" in b.dataset) { st.marca = st.marca === b.dataset.brand ? "" : b.dataset.brand; $("stock").scrollIntoView({ behavior: "smooth" }); }
+      render();
+    });
+    $("sort").addEventListener("change", e => { st.sort = e.target.value; render(); });
+    $("finder")?.addEventListener("submit", e => {
+      e.preventDefault(); st.tipo = $("fb").value; st.budget = $("fp").value; st.marca = ""; render();
+      $("stock").scrollIntoView({ behavior: "smooth" });
+    });
   }
 
-  // Financiación
-  const fcar = $("f-car");
-  if (fcar) {
-    const tin = parseFloat(document.querySelector("#financiacion .fine").textContent.match(/TIN ([\d,]+)/)[1].replace(",", ".")) / 100;
+  // Calculadora de cuota
+  if ($("fc")) {
+    const tin = +$("ftin").dataset.tin;
     const calc = () => {
-      const price = +fcar.value, name = fcar.selectedOptions[0].dataset.name;
-      const ent = +$("f-entrada").value, m = +$("f-meses").value, r = tin / 12;
+      const price = +$("fc").value, name = $("fc").selectedOptions[0].dataset.name;
+      const ent = +$("fe").value, m = +$("fm").value, r = tin / 12;
       const q = Math.round(price * (1 - ent / 100) * r / (1 - Math.pow(1 + r, -m)));
-      $("f-entrada-v").textContent = `${ent} % (${eur(price * ent / 100)})`;
-      $("f-meses-v").textContent = `${m} meses`;
-      $("f-cuota").textContent = q;
-      $("f-wa").href = `https://wa.me/${WA}?text=${encodeURIComponent(`Hola, quiero financiar el ${name} (${eur(price)}) con ${ent}% de entrada a ${m} meses. Cuota orientativa ${q} €/mes.`)}`;
+      $("fev").textContent = `${ent} % · ${eur(price * ent / 100)}`;
+      $("fmv").textContent = `${m} meses`;
+      $("fq").textContent = q;
+      $("fwa").href = wa(`Hola, quiero financiar el ${name} (${eur(price)}) con ${ent} % de entrada a ${m} meses. Cuota orientativa ${q} €/mes.`);
     };
-    ["f-car", "f-entrada", "f-meses"].forEach(id => $(id).addEventListener("input", calc));
+    ["fc", "fe", "fm"].forEach(id => $(id).addEventListener("input", calc));
     calc();
   }
 
   // Tasación: abre WhatsApp con los datos escritos
-  $("tasacion")?.addEventListener("submit", e => {
+  $("tas")?.addEventListener("submit", e => {
     e.preventDefault();
-    const msg = `Hola, quiero tasar mi coche: ${$("t-marca").value}, año ${$("t-year").value}, ${$("t-km").value} km. Mi teléfono: ${$("t-tel").value}. Te envío fotos.`;
-    window.open(`https://wa.me/${WA}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+    const msg = `Hola, quiero tasar mi coche: ${$("tm").value}, año ${$("ty").value}, ${$("tk").value} km. Mi teléfono: ${$("tt").value}. Ahora os mando fotos.`;
+    window.open(wa(msg), "_blank", "noopener");
   });
 
   // Galería de la ficha
   document.querySelectorAll(".thumbs button").forEach(b => b.addEventListener("click", () => {
-    $("g-main").src = b.dataset.src;
+    const img = $("gmain").querySelector("img");
+    if (img) img.src = b.dataset.src;
     document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-current", x === b));
   }));
 })();
