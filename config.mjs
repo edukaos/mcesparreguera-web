@@ -17,7 +17,9 @@ export default {
   // URLs de la web antigua que no salen de la columna ficha_antigua de la hoja → página nueva
   redirecciones: { "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/" },
   financiacion: { tin: 0.0899, entradaPct: 10, meses: 72 }, // TODO Edu: tipo real de la financiera
-  // Google Sheet de los coches (compartida con "cualquiera con el enlace"). También se puede pasar como variable SHEET_CSV_URL.
+  // Google Sheet de los coches. Si existe el secreto GOOGLE_SA_KEY se lee en privado con la API (solo hace falta sheetId);
+  // si no, se descarga como CSV público (compartida con "cualquiera con el enlace"), o desde la variable SHEET_CSV_URL.
+  sheetId: process.env.SHEET_ID || "1syQBOvG-LhIggrnBEGAU2aN57kHjP8nlysCKzv1wYEw",
   sheetCsvUrl: process.env.SHEET_CSV_URL ||
     "https://docs.google.com/spreadsheets/d/1syQBOvG-LhIggrnBEGAU2aN57kHjP8nlysCKzv1wYEw/export?format=csv",
 };

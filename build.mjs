@@ -1,7 +1,7 @@
 // Genera la web estática en dist/ a partir de la Google Sheet (o de data/coches.csv si no hay enlace).
 // Uso: node build.mjs   (Node 18+, sin dependencias)
 import { mkdir, writeFile, readFile, copyFile, rm, readdir, cp, access } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { createHash, createSign } from "node:crypto";
 import cfg from "./config.mjs";
 import { homePage, carPage, redirectPage, notFoundPage } from "./src/templates.mjs";
 
@@ -13,6 +13,10 @@ const withBase = html => html.replace(/(href|src|srcset|data-src)="\/(?!\/)/g, `
 
 // ---------- Datos ----------
 function parseCsv(text) {
+  return toObjects(csvRows(text));
+}
+
+function csvRows(text) {
   const rows = [];
   let row = [], field = "", q = false;
   for (let i = 0; i < text.length; i++) {
@@ -29,7 +33,12 @@ function parseCsv(text) {
     } else field += ch;
   }
   if (field || row.length) { row.push(field); rows.push(row); }
-  const [head, ...body] = rows.filter(r => r.some(c => c.trim()));
+  return rows;
+}
+
+// Filas (la primera es la cabecera) -> objetos { columna: valor }
+function toObjects(rows) {
+  const [head, ...body] = rows.map(r => r.map(c => String(c ?? ""))).filter(r => r.some(c => c.trim()));
   const keys = head.map(h => h.trim().toLowerCase());
   return body.map(r => Object.fromEntries(keys.map((k, i) => [k, (r[i] ?? "").trim()])));
 }
@@ -67,9 +76,38 @@ function normalize(r) {
   return car;
 }
 
+// Hoja privada: se lee con la API de Google Sheets usando la cuenta de servicio (secreto GOOGLE_SA_KEY, la clave JSON).
+async function sheetRowsWithServiceAccount(keyJson) {
+  const key = JSON.parse(keyJson);
+  const b64 = o => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const now = Math.floor(Date.now() / 1000);
+  const unsigned = `${b64({ alg: "RS256", typ: "JWT" })}.${b64({
+    iss: key.client_email, scope: "https://www.googleapis.com/auth/spreadsheets.readonly",
+    aud: "https://oauth2.googleapis.com/token", iat: now, exp: now + 3600,
+  })}`;
+  const jwt = `${unsigned}.${createSign("RSA-SHA256").update(unsigned).sign(key.private_key, "base64url")}`;
+  const tok = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({ grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer", assertion: jwt }),
+  });
+  if (!tok.ok) throw new Error(`Google rechazó la clave de la cuenta de servicio (${tok.status}): ${await tok.text()}`);
+  const { access_token } = await tok.json();
+  // Sin nombre de pestaña, Google usa la primera pestaña de la hoja.
+  const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/A1:ZZ`, {
+    headers: { authorization: `Bearer ${access_token}` },
+  });
+  if (res.status === 403) throw new Error(`Sin permiso: comparte la hoja con ${key.client_email} (Lector) y activa la Google Sheets API`);
+  if (!res.ok) throw new Error(`No se pudo leer la hoja (${res.status}): ${await res.text()}`);
+  return (await res.json()).values || [];
+}
+
 async function loadCars() {
-  let text;
-  if (/^https?:/.test(cfg.sheetCsvUrl)) {
+  let text, rows;
+  if (process.env.GOOGLE_SA_KEY) {
+    rows = await sheetRowsWithServiceAccount(process.env.GOOGLE_SA_KEY);
+    console.log("Coches leídos de la Google Sheet (privada, cuenta de servicio)");
+  } else if (/^https?:/.test(cfg.sheetCsvUrl)) {
     const res = await fetch(cfg.sheetCsvUrl);
     if (res.status === 401 || res.status === 403) throw new Error("La hoja no es pública: en Google Sheets, Compartir > Cualquier persona con el enlace > Lector");
     if (!res.ok) throw new Error(`No se pudo leer la hoja (${res.status})`);
@@ -81,7 +119,7 @@ async function loadCars() {
     text = await readFile(file, "utf8");
     console.log(`Usando el archivo local ${file}`);
   }
-  const all = parseCsv(text).filter(r => r.marca && r.modelo).map(normalize);
+  const all = (rows ? toObjects(rows) : parseCsv(text)).filter(r => r.marca && r.modelo).map(normalize);
   const cars = all.filter(c => c.estado !== "vendido" && c.precio);
   cars.sort((a, b) => (b.destacado - a.destacado) || (a.estado === "reservado") - (b.estado === "reservado"));
   return { cars, vendidos: all.filter(c => c.estado === "vendido") };
