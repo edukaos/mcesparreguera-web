@@ -1,0 +1,14 @@
+name: tmp debug
+on: workflow_dispatch
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sL -A "Mozilla/5.0" https://mcesparreguera.com/seat-leon-1-2-tsi-style-110cv -o p.html
+          wc -c p.html
+          grep -o 'wp-content/gallery/[^"'"'"' ]*' p.html | sort -u | head -50
+          grep -o 'nggallery[^"'"'"' ]*' p.html | sort -u | head -30
+          grep -o 'data-[a-z-]*="[^"]\{0,120\}' p.html | sort | uniq -c | sort -rn | head -40
+          grep -o 'ngg[^"]\{0,80\}' p.html | sort -u | head -40
+          grep -io 'admin-ajax[^"]\{0,100\}\|wp-json[^"]\{0,100\}' p.html | sort -u | head
