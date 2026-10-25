@@ -2,7 +2,7 @@
 (() => {
   const $ = id => document.getElementById(id);
   const WA = document.querySelector(".fab")?.href.match(/wa\.me\/(\d+)/)?.[1];
-  const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0 }) + " €";
+  const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0, useGrouping: "always" }) + " €";
 
   // Filtros
   const grid = $("grid");

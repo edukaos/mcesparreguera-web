@@ -107,8 +107,8 @@ async function localizePhotos(cars) {
 
 // ---------- Utilidades de plantilla ----------
 const esc = s => String(s ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
-const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0 }) + " €";
-const kmf = n => n == null ? "km a consultar" : n.toLocaleString("es-ES") + " km";
+const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0, useGrouping: "always" }) + " €";
+const kmf = n => n == null ? "km a consultar" : n.toLocaleString("es-ES", { useGrouping: "always" }) + " km";
 const phoneFmt = p => p.replace(/^34/, "").replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3");
 const title = c => `${c.marca} ${c.modelo}`;
 function cuota(price, { tin, entradaPct, meses } = cfg.financiacion) {
