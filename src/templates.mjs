@@ -56,7 +56,7 @@ function layout({ pageTitle, description, path, body, jsonld, image }) {
 <title>${esc(pageTitle)}</title>
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${url}">
-<meta name="theme-color" content="#173a2c">
+<meta name="theme-color" content="#2f3c45">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="es_ES">
 <meta property="og:title" content="${esc(pageTitle)}">
@@ -254,10 +254,10 @@ ${star ? `<section class="g"><div class="in">
     <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" fill="none" stroke="#ffffff10"/></pattern></defs>
       <rect width="600" height="400" fill="url(#grid)"/>
-      <path d="M0 250 70 205l30 18 38-55 26 32 34-74 28 50 30-66 34 58 28-40 36 50 30-72 34 64 30-34 42 56 36-46 30 30 50-30 44 22 60-38v222H0Z" fill="#1f4a38"/>
-      <path d="M-20 280C120 250 200 290 300 262s200-50 330-20" fill="none" stroke="#e8622c" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14"/>
-      <g transform="translate(300 250)"><circle r="34" fill="#e8622c33"/><circle r="16" fill="#e8622c"/><circle r="6" fill="#fff"/></g>
-      <text x="330" y="196" fill="#9fd3b2" font-family="Nunito Sans,sans-serif" font-size="14" font-weight="800" letter-spacing="2">MONTSERRAT</text>
+      <path d="M0 250 70 205l30 18 38-55 26 32 34-74 28 50 30-66 34 58 28-40 36 50 30-72 34 64 30-34 42 56 36-46 30 30 50-30 44 22 60-38v222H0Z" fill="#3b4a54"/>
+      <path d="M-20 280C120 250 200 290 300 262s200-50 330-20" fill="none" stroke="#6fb1f2" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14"/>
+      <g transform="translate(300 250)"><circle r="34" fill="#6fb1f233"/><circle r="16" fill="#6fb1f2"/><circle r="6" fill="#fff"/></g>
+      <text x="330" y="196" fill="#9cc6f0" font-family="Nunito Sans,sans-serif" font-size="14" font-weight="800" letter-spacing="2">MONTSERRAT</text>
     </svg>
     <div class="lbl"><b>Esparreguera</b><span>Baix Llobregat · A 40 minutos de Barcelona por la A-2</span></div>
   </div>
