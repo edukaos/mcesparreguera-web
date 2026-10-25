@@ -8,7 +8,7 @@ import { homePage, carPage } from "./src/templates.mjs";
 const DIST = "dist";
 // Ruta base cuando la web vive en una subcarpeta (p. ej. GitHub Pages sin dominio propio: /mcesparreguera-web).
 const BASE = (process.env.BASE_PATH || "").replace(/\/$/, "");
-const withBase = html => html.replace(/(href|src|data-src)="\/(?!\/)/g, `$1="${BASE}/`);
+const withBase = html => html.replace(/(href|src|data-src)="\/(?!\/)/g, `$1="${BASE}/`).replace(/&quot;\/(?!\/)/g, `&quot;${BASE}/`);
 
 // ---------- Datos ----------
 function parseCsv(text) {

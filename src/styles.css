@@ -327,3 +327,19 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .thumbs button{flex:none;width:96px;aspect-ratio:4/3;border:3px solid transparent;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;background:var(--mint)}
 .thumbs button[aria-current="true"]{border-color:var(--acc)}
 .thumbs img{width:100%;height:100%;object-fit:cover}
+
+/* Galería: flechas, contador y pantalla completa */
+.gal .mainph img{cursor:zoom-in}
+.gnav{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;background:#ffffffe6;color:var(--ink);font:400 30px/1 var(--font-b);cursor:pointer;z-index:2;display:grid;place-items:center;box-shadow:0 6px 16px -8px #0007;padding-bottom:4px}
+.gnav:hover{background:#fff}
+.gnav.prev{left:14px}.gnav.next{right:14px}
+.gcount{position:absolute;left:16px;bottom:16px;z-index:2;background:#1b252cb3;color:#fff;border-radius:999px;padding:5px 12px;font-weight:700;font-size:14px}
+.gzoom{position:absolute;right:16px;bottom:16px;z-index:2;width:42px;height:42px;border-radius:12px;border:0;background:#ffffffe6;cursor:pointer;font-size:20px;color:var(--ink)}
+.thumbs{scroll-snap-type:x mandatory}
+.thumbs button{scroll-snap-align:start;opacity:.7;transition:opacity .15s}
+.thumbs button[aria-current="true"],.thumbs button:hover{opacity:1}
+.lightbox{position:fixed;inset:0;z-index:100;background:#0d1216f2;display:grid;place-items:center;padding:max(56px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(56px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.lightbox img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+.lightbox .lx{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:calc(14px + env(safe-area-inset-right,0px));width:44px;height:44px;border-radius:50%;border:0;background:#ffffff26;color:#fff;font-size:20px;cursor:pointer}
+.lightbox .gcount{left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+@media (max-width:600px){.gnav{width:40px;height:40px;font-size:26px}.gnav.prev{left:8px}.gnav.next{right:8px}}

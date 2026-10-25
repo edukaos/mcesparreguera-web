@@ -21,9 +21,10 @@ for (const r of rows) {
     let html = "";
     try { html = await (await fetch(u, { headers: UA })).text(); } catch { continue; }
     found.push(...[...html.matchAll(/https?:\/\/[^"'\s)]+?\/wp-content\/(?:uploads|smush-webp|gallery)\/[^"'\s)]+?\.(?:jpe?g|png|webp)/gi)].map(m => m[0]));
-    for (const m of html.matchAll(/href="([^"]*\/nggallery\/(?:image|page)\/[^"]+)"/gi)) {
-      const next = new URL(m[1].replace(/&amp;/g, "&"), u).href;
-      if (next.startsWith(url) && !visited.has(next)) queue.push(next);
+    // Los enlaces del navegador de imágenes van entre comillas simples y a veces son relativos
+    for (const m of html.matchAll(/nggallery\/(image|page)\/([^"'\s\/<>]+)/gi)) {
+      const next = `${url.replace(/\/$/, "")}/nggallery/${m[1]}/${m[2]}/`;
+      if (!visited.has(next)) queue.push(next);
     }
   }
   // Quita logos/favicons y versiones reducidas (-400x250) para quedarnos con el original

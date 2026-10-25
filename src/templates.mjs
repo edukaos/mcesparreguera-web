@@ -279,13 +279,15 @@ ${star ? `<section class="g"><div class="in">
 export function carPage(c, cars) {
   const sim = cars.filter(x => x !== c).sort((a, b) => Math.abs(a.precio - c.precio) - Math.abs(b.precio - c.precio)).slice(0, 4);
   const dgtTxt = { C: "C (verde)", B: "B (amarilla)", ECO: "ECO", "0": "0 emisiones", H: "Histórico" }[c.etiqueta] || "Consultar";
-  const thumbs = c.fotos.length > 1 ? `<div class="thumbs">${c.fotos.map((f, i) => `<button type="button" data-src="${esc(f)}" aria-current="${i === 0}" aria-label="Foto ${i + 1}"><img src="${esc(f)}" alt="" loading="lazy"></button>`).join("")}</div>` : "";
+  const thumbs = c.fotos.length > 1 ? `<div class="thumbs">${c.fotos.map((f, i) => `<button type="button" data-i="${i}" aria-current="${i === 0}" aria-label="Foto ${i + 1}"><img src="${esc(f)}" alt="" loading="lazy"></button>`).join("")}</div>` : "";
   const body = `
 <div class="g"><div class="in">
   <p class="crumbs"><a href="/">Inicio</a> / <a href="/#stock">Coches</a> / <span>${esc(title(c))}</span></p>
   <div class="det">
     <div>
-      <div class="gal"><div class="mainph" id="gmain">${pic(c, true)}<span class="pill">${c.year ?? ""}</span>${dgt(c.etiqueta)}</div>${thumbs}
+      <div class="gal" data-fotos='${esc(JSON.stringify(c.fotos))}'><div class="mainph" id="gmain">${pic(c, true)}<span class="pill">${c.year ?? ""}</span>${dgt(c.etiqueta)}${c.fotos.length > 1 ? `
+        <button class="gnav prev" type="button" aria-label="Foto anterior">‹</button><button class="gnav next" type="button" aria-label="Foto siguiente">›</button>
+        <span class="gcount"><b id="gi">1</b> / ${c.fotos.length}</span>` : ""}${c.fotos[0] ? '<button class="gzoom" type="button" aria-label="Ver en pantalla completa">⤢</button>' : ""}</div>${thumbs}
         <p class="note">${c.fotos[0] ? "Más fotos y vídeo por WhatsApp, te los mandamos al momento." : "Pídenos las fotos por WhatsApp y te las mandamos al momento."}</p></div>
       <div style="margin-top:28px"><p class="eyebrow">${esc(c.carroceria)} · ${c.year ?? ""}</p><h1 style="margin-top:10px">${esc(title(c))}</h1><p class="ver">${esc(c.version)}</p></div>
       <div class="specs6">

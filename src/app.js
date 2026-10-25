@@ -67,10 +67,55 @@
     window.open(wa(msg), "_blank", "noopener");
   });
 
-  // Galería de la ficha
-  document.querySelectorAll(".thumbs button").forEach(b => b.addEventListener("click", () => {
-    const img = $("gmain").querySelector("img");
-    if (img) img.src = b.dataset.src;
-    document.querySelectorAll(".thumbs button").forEach(x => x.setAttribute("aria-current", x === b));
-  }));
+  // Galería de la ficha: flechas, miniaturas, deslizar y pantalla completa
+  const gal = document.querySelector(".gal[data-fotos]");
+  if (gal) {
+    const fotos = JSON.parse(gal.dataset.fotos);
+    const main = $("gmain").querySelector("img");
+    const thumbs = [...document.querySelectorAll(".thumbs button")];
+    let i = 0;
+    const lb = document.createElement("div");
+    lb.className = "lightbox"; lb.hidden = true;
+    lb.innerHTML = '<img alt=""><button class="lx" type="button" aria-label="Cerrar">✕</button><button class="gnav prev" type="button" aria-label="Foto anterior">‹</button><button class="gnav next" type="button" aria-label="Foto siguiente">›</button><span class="gcount"></span>';
+    document.body.append(lb);
+    const show = n => {
+      i = (n + fotos.length) % fotos.length;
+      if (main) main.src = fotos[i];
+      lb.querySelector("img").src = fotos[i];
+      lb.querySelector(".gcount").textContent = `${i + 1} / ${fotos.length}`;
+      if ($("gi")) $("gi").textContent = i + 1;
+      thumbs.forEach((t, k) => t.setAttribute("aria-current", k === i));
+      thumbs[i]?.scrollIntoView({ block: "nearest", inline: "nearest" });
+      [fotos[(i + 1) % fotos.length], fotos[(i - 1 + fotos.length) % fotos.length]].forEach(u => { new Image().src = u; });
+    };
+    const open = () => { if (!fotos.length) return; show(i); lb.hidden = false; document.body.style.overflow = "hidden"; lb.querySelector(".lx").focus(); };
+    const close = () => { lb.hidden = true; document.body.style.overflow = ""; };
+    thumbs.forEach(t => t.addEventListener("click", () => show(+t.dataset.i)));
+    gal.addEventListener("click", e => {
+      if (e.target.closest(".prev")) show(i - 1);
+      else if (e.target.closest(".next")) show(i + 1);
+      else if (e.target.closest(".gzoom") || e.target === main) open();
+    });
+    lb.addEventListener("click", e => {
+      if (e.target.closest(".prev")) show(i - 1);
+      else if (e.target.closest(".next")) show(i + 1);
+      else if (e.target.closest(".lx") || e.target === lb) close();
+    });
+    document.addEventListener("keydown", e => {
+      if (lb.hidden) return;
+      if (e.key === "Escape") close();
+      if (e.key === "ArrowLeft") show(i - 1);
+      if (e.key === "ArrowRight") show(i + 1);
+    });
+    // Deslizar con el dedo
+    let x0 = null;
+    [$("gmain"), lb].forEach(el => {
+      el.addEventListener("touchstart", e => { x0 = e.touches[0].clientX; }, { passive: true });
+      el.addEventListener("touchend", e => {
+        if (x0 == null) return;
+        const dx = e.changedTouches[0].clientX - x0; x0 = null;
+        if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+      });
+    });
+  }
 })();
