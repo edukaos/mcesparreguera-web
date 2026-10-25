@@ -15,7 +15,7 @@ Una fila por coche en la Google Sheet. Columnas:
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
-| fotos | enlaces separados por espacios | Enlaces de "Compartir" de Google Drive (con acceso "cualquiera con el enlace") o URLs de imágenes. La primera es la portada. |
+| fotos | enlaces separados por espacios | Enlaces de "Compartir" de Google Drive (con acceso "cualquiera con el enlace") o URLs de imágenes. La primera es la portada. Si se deja vacío se usan las fotos de `fotos/<id>/` del repositorio. |
 | descripcion | texto libre | Equipamiento y estado. |
 
 Para publicar al momento sin esperar a la hora: en GitHub, pestaña Actions > "Publicar web" > Run workflow.

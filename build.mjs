@@ -1,6 +1,6 @@
 // Genera la web estática en dist/ a partir de la Google Sheet (o de data/coches.csv si no hay enlace).
 // Uso: node build.mjs   (Node 18+, sin dependencias)
-import { mkdir, writeFile, readFile, copyFile, rm } from "node:fs/promises";
+import { mkdir, writeFile, readFile, copyFile, rm, readdir, cp } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import cfg from "./config.mjs";
 
@@ -102,6 +102,20 @@ async function localizePhotos(cars) {
         return u;
       }
     }));
+  }
+}
+
+// Si la hoja no trae fotos, usa las de fotos/<id>/ del repositorio (importadas de la web antigua).
+async function repoPhotos(cars) {
+  for (const c of cars) {
+    if (c.fotos.length) continue;
+    try {
+      const files = (await readdir(`fotos/${c.id}`)).filter(f => /\.(jpe?g|png|webp)$/i.test(f)).sort();
+      if (files.length) {
+        await cp(`fotos/${c.id}`, `${DIST}/fotos/${c.id}`, { recursive: true });
+        c.fotos = files.map(f => `/fotos/${c.id}/${f}`);
+      }
+    } catch {}
   }
 }
 
@@ -390,6 +404,7 @@ const cars = await loadCars();
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
 await localizePhotos(cars);
+await repoPhotos(cars);
 await writeFile(`${DIST}/index.html`, withBase(homePage(cars)));
 for (const c of cars) {
   await mkdir(`${DIST}/coches/${c.id}`, { recursive: true });
