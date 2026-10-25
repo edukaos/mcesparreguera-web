@@ -11,8 +11,21 @@ const UA = { "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 C
 for (const r of rows) {
   const id = r[col("id")], url = r[r.length - 1];
   if (!url?.startsWith("http")) continue;
-  const html = await (await fetch(url, { headers: UA })).text();
-  const found = [...html.matchAll(/https?:\/\/[^"'\s)]+?\/wp-content\/(?:uploads|smush-webp|gallery)\/[^"'\s)]+?\.(?:jpe?g|png|webp)/gi)].map(m => m[0]);
+  // La galería (NextGEN) solo pinta unas pocas fotos por página: recorremos también
+  // sus páginas de imagen (/nggallery/image/…) y de paginación (/nggallery/page/N)
+  const found = [], visited = new Set(), queue = [url];
+  while (queue.length && visited.size < 80) {
+    const u = queue.shift();
+    if (visited.has(u)) continue;
+    visited.add(u);
+    let html = "";
+    try { html = await (await fetch(u, { headers: UA })).text(); } catch { continue; }
+    found.push(...[...html.matchAll(/https?:\/\/[^"'\s)]+?\/wp-content\/(?:uploads|smush-webp|gallery)\/[^"'\s)]+?\.(?:jpe?g|png|webp)/gi)].map(m => m[0]));
+    for (const m of html.matchAll(/href="([^"]*\/nggallery\/(?:image|page)\/[^"]+)"/gi)) {
+      const next = new URL(m[1].replace(/&amp;/g, "&"), u).href;
+      if (next.startsWith(url) && !visited.has(next)) queue.push(next);
+    }
+  }
   // Quita logos/favicons y versiones reducidas (-400x250) para quedarnos con el original
   const base = u => u.split("?")[0].replace("/smush-webp/", "/uploads/").replace("/thumbs/thumbs_", "/").replace(/\.(jpe?g|png)\.webp$/i, ".$1").replace(/-\d+x\d+(?=\.\w+$)/, "");
   const urls = [...new Set(found.map(base))].filter(u => !/logo|favicon|icon|cropped|patrocin|colabor/i.test(u));
@@ -33,5 +46,5 @@ for (const r of rows) {
     n++;
     await writeFile(`fotos/${id}/${String(n).padStart(2, "0")}.jpg`, buf);
   }
-  console.log(`${id}: ${n} fotos de ${urls.length} enlaces`);
+  console.log(`${id}: ${n} fotos de ${urls.length} enlaces (${visited.size} páginas)`);
 }
