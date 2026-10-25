@@ -1,14 +1,15 @@
 // Genera la web estática en dist/ a partir de la Google Sheet (o de data/coches.csv si no hay enlace).
 // Uso: node build.mjs   (Node 18+, sin dependencias)
-import { mkdir, writeFile, readFile, copyFile, rm, readdir, cp } from "node:fs/promises";
+import { mkdir, writeFile, readFile, copyFile, rm, readdir, cp, access } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import cfg from "./config.mjs";
-import { homePage, carPage } from "./src/templates.mjs";
+import { homePage, carPage, redirectPage, notFoundPage } from "./src/templates.mjs";
 
 const DIST = "dist";
 // Ruta base cuando la web vive en una subcarpeta (p. ej. GitHub Pages sin dominio propio: /mcesparreguera-web).
 const BASE = (process.env.BASE_PATH || "").replace(/\/$/, "");
-const withBase = html => html.replace(/(href|src|data-src)="\/(?!\/)/g, `$1="${BASE}/`).replace(/&quot;\/(?!\/)/g, `&quot;${BASE}/`);
+const withBase = html => html.replace(/(href|src|srcset|data-src)="\/(?!\/)/g, `$1="${BASE}/`).replace(/&quot;\/(?!\/)/g, `&quot;${BASE}/`)
+  .replace(/(\d+w), \/(?!\/)/g, `$1, ${BASE}/`).replace(/url\(fonts\//g, `url(${BASE}/fonts/`);
 
 // ---------- Datos ----------
 function parseCsv(text) {
@@ -60,6 +61,7 @@ function normalize(r) {
     precio: num(r.precio),
     fotos: (r.fotos || "").split(/[\s|]+/).filter(Boolean).map(photoUrl),
     descripcion: r.descripcion || r["descripción"] || "",
+    fichaAntigua: r.ficha_antigua || "",
   };
   car.sil = SIL_BY_BODY[car.carroceria.toLowerCase()] || "berlina";
   return car;
@@ -79,10 +81,10 @@ async function loadCars() {
     text = await readFile(file, "utf8");
     console.log(`Usando el archivo local ${file}`);
   }
-  const cars = parseCsv(text).filter(r => r.marca && r.modelo).map(normalize)
-    .filter(c => c.estado !== "vendido" && c.precio);
+  const all = parseCsv(text).filter(r => r.marca && r.modelo).map(normalize);
+  const cars = all.filter(c => c.estado !== "vendido" && c.precio);
   cars.sort((a, b) => (b.destacado - a.destacado) || (a.estado === "reservado") - (b.estado === "reservado"));
-  return cars;
+  return { cars, vendidos: all.filter(c => c.estado === "vendido") };
 }
 
 // Descarga las fotos a dist/fotos para no depender de Drive al navegar. Si falla, usa la URL original.
@@ -120,24 +122,94 @@ async function repoPhotos(cars) {
   }
 }
 
+// Versiones WebP de cada foto (320–1600 px) para que el móvil no descargue la foto grande.
+// Usa sharp si está instalado (npm install); si no, sirve la foto original. Caché en .cache/img entre builds.
+const WIDTHS = [320, 640, 800, 1024, 1600];
+let sharp = null;
+try { sharp = (await import("sharp")).default; } catch { console.warn("sharp no está instalado: fotos sin optimizar"); }
+
+async function optimizePhotos(cars) {
+  await mkdir(".cache/img", { recursive: true });
+  for (const c of cars) {
+    c.img = await Promise.all(c.fotos.map(async u => {
+      if (!sharp || !u.startsWith("/")) return { src: u };
+      try {
+        const buf = await readFile(DIST + u);
+        const meta = await sharp(buf).metadata();
+        const [w, h] = (meta.orientation || 1) >= 5 ? [meta.height, meta.width] : [meta.width, meta.height];
+        const hash = createHash("md5").update(buf).digest("hex").slice(0, 10);
+        const sizes = WIDTHS.filter(x => x < w).concat(Math.min(w, 1600));
+        const files = await Promise.all(sizes.map(async x => {
+          const out = u.replace(/\.\w+$/, `-${x}.webp`), cached = `.cache/img/${hash}-${x}.webp`;
+          try { await access(cached); } catch {
+            await writeFile(cached, await sharp(buf).rotate().resize({ width: x }).webp({ quality: 72 }).toBuffer());
+          }
+          await copyFile(cached, DIST + out);
+          return `${out} ${x}w`;
+        }));
+        return { src: files.at(-1).split(" ")[0], srcset: files.join(", "), w, h, orig: u };
+      } catch (e) {
+        console.warn(`Foto sin optimizar (${c.id}): ${u}`);
+        return { src: u };
+      }
+    }));
+  }
+}
+
+const xmlEsc = s => String(s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[ch]));
+const page = async (path, html) => {
+  await mkdir(`${DIST}${path}`, { recursive: true });
+  await writeFile(`${DIST}${path}index.html`, html);
+};
+
 // ---------- Build ----------
-const cars = await loadCars();
+const { cars, vendidos } = await loadCars();
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
 await localizePhotos(cars);
 await repoPhotos(cars);
-await writeFile(`${DIST}/index.html`, withBase(homePage(cars)));
+await optimizePhotos(cars);
+// El CSS va dentro de cada página: es pequeño y así no bloquea el primer pintado.
+const css = (await readFile("src/styles.css", "utf8")).replace(/\n\s*/g, "\n");
+const finish = html => withBase(html.replace('<link rel="stylesheet" href="/styles.css">', `<style>${css}</style>`));
+await page("/", finish(homePage(cars)));
+for (const c of cars) await page(`/coches/${c.id}/`, finish(carPage(c, cars)));
+await writeFile(`${DIST}/404.html`, finish(notFoundPage(cars)));
+
+// Redirecciones: /coches/ y las fichas de la web antigua (columna ficha_antigua) apuntan a la nueva URL,
+// y los coches vendidos llevan al stock. Así no se pierde lo que Google ya tenía indexado.
+const redirects = new Map([["/coches/", "/#stock"], ...Object.entries(cfg.redirecciones || {})]);
 for (const c of cars) {
-  await mkdir(`${DIST}/coches/${c.id}`, { recursive: true });
-  await writeFile(`${DIST}/coches/${c.id}/index.html`, withBase(carPage(c, cars)));
+  const old = c.fichaAntigua && new URL(c.fichaAntigua, "https://x").pathname.replace(/\/?$/, "/");
+  if (old && old !== `/coches/${c.id}/`) redirects.set(old, `/coches/${c.id}/`);
 }
-await copyFile("src/styles.css", `${DIST}/styles.css`);
+for (const c of vendidos) {
+  redirects.set(`/coches/${c.id}/`, "/#stock");
+  const old = c.fichaAntigua && new URL(c.fichaAntigua, "https://x").pathname.replace(/\/?$/, "/");
+  if (old) redirects.set(old, "/#stock");
+}
+for (const [from, to] of redirects) if (from !== "/") await page(from, redirectPage(to, BASE));
+
 await copyFile("src/app.js", `${DIST}/app.js`);
 await cp("src/img", `${DIST}/img`, { recursive: true });
+await cp("src/fonts", `${DIST}/fonts`, { recursive: true });
+await copyFile("src/favicon.ico", `${DIST}/favicon.ico`);
+await writeFile(`${DIST}/site.webmanifest`, JSON.stringify({
+  name: `${cfg.nombre} Esparreguera`, short_name: cfg.nombre, lang: "es", start_url: "./", scope: "./", display: "standalone",
+  background_color: "#f3f5f7", theme_color: "#2f3c45",
+  icons: [
+    { src: "img/icon-192.png", sizes: "192x192", type: "image/png" },
+    { src: "img/icon-512.png", sizes: "512x512", type: "image/png" },
+    { src: "img/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+  ],
+}, null, 1));
+
 const today = new Date().toISOString().slice(0, 10);
+const urls = [{ path: "/", imgs: [] }, ...cars.map(c => ({ path: `/coches/${c.id}/`, imgs: c.img.map(i => i.orig || i.src) }))];
 await writeFile(`${DIST}/sitemap.xml`, `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${["/", ...cars.map(c => `/coches/${c.id}/`)].map(p => `<url><loc>${cfg.siteUrl}${p}</loc><lastmod>${today}</lastmod></url>`).join("\n")}
-</urlset>`);
-await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\nSitemap: ${cfg.siteUrl}/sitemap.xml\n`);
-console.log(`Web generada en ${DIST}/ con ${cars.length} coches`);
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${urls.map(u => `<url><loc>${cfg.siteUrl}${u.path}</loc><lastmod>${today}</lastmod>${u.imgs.map(i => `<image:image><image:loc>${xmlEsc(i.startsWith("/") ? cfg.siteUrl + i : i)}</image:loc></image:image>`).join("")}</url>`).join("\n")}
+</urlset>
+`);
+await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\n\nSitemap: ${cfg.siteUrl}/sitemap.xml\n`);
+console.log(`Web generada en ${DIST}/ con ${cars.length} coches y ${redirects.size} redirecciones`);
