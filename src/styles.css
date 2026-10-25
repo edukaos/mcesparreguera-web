@@ -265,7 +265,9 @@ details p{color:var(--muted);padding-bottom:18px;max-width:62ch}
 footer{background:var(--deep);color:#b3c0c9;font-size:15px;margin-top:88px}
 footer .in{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:32px;padding-block:52px 28px}
 footer b{color:#fff;font:800 18px var(--font-d);display:block;margin-bottom:10px}
-footer a{text-decoration:none;display:block;padding:3px 0}
+footer a{text-decoration:none;display:flex;align-items:center;gap:10px;padding:5px 0;overflow-wrap:anywhere}
+footer a svg{flex:none;width:30px;height:30px;padding:7px;border-radius:9px;background:#ffffff12;color:#8fc0f2;transition:background .15s}
+footer a:hover svg{background:var(--acc);color:#fff}
 footer a:hover{color:#fff}
 footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;font-size:13.5px}
 @media (max-width:760px){footer .in{grid-template-columns:1fr}}

@@ -85,8 +85,8 @@ ${body}
 </main>
 <footer class="g"><div class="in">
   <div><b>${esc(cfg.nombre)}</b><p>Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, grúa, rent a car y representante oficial de Aixam.</p></div>
-  <div><b>Coches</b><a href="/#stock">Coches en venta</a><a href="/#vender">Vender mi coche</a><a href="/#financiacion">Financiación</a></div>
-  <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">Instagram @${cfg.instagram}</a></div>
+  <div><b>Coches</b><a href="/#stock">${I.car}Coches en venta</a><a href="/#vender">${I.tag}Vender mi coche</a><a href="/#financiacion">${I.euro}Financiación</a><a href="/#servicios">${I.wrench}Servicios</a></div>
+  <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="/#contacto">${I.pin}Esparreguera, Barcelona</a></div>
   <div class="bottom">© ${new Date().getFullYear()} ${esc(cfg.nombre)} Esparreguera</div>
 </div></footer>
 <div class="mbar"><a class="btn o sm" href="tel:+34${cfg.telefono}">${I.phone}${TEL}</a><a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener">${I.wa}WhatsApp</a></div>
