@@ -15,6 +15,17 @@ jobs:
         with:
           node-version: 22
       - run: node tools/importar-fotos.mjs
+      # Reduce las fotos a 1600 px para que la web cargue rápido
+      - run: |
+          pip install --quiet pillow
+          python3 -c "
+          import glob
+          from PIL import Image, ImageOps
+          for f in glob.glob('fotos/*/*.jpg'):
+              im = ImageOps.exif_transpose(Image.open(f)).convert('RGB')
+              im.thumbnail((1600, 1600))
+              im.save(f, quality=80, optimize=True, progressive=True)
+          "
       - run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
