@@ -65,6 +65,7 @@ async function loadCars() {
   let text;
   if (/^https?:/.test(cfg.sheetCsvUrl)) {
     const res = await fetch(cfg.sheetCsvUrl);
+    if (res.status === 401 || res.status === 403) throw new Error("La hoja no es pública: en Google Sheets, Compartir > Cualquier persona con el enlace > Lector");
     if (!res.ok) throw new Error(`No se pudo leer la hoja (${res.status})`);
     text = await res.text();
     if (/<html/i.test(text.slice(0, 500))) throw new Error("La hoja no es pública: compártela con \"cualquiera con el enlace\"");
