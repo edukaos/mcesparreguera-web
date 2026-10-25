@@ -28,7 +28,7 @@ for (const r of rows) {
     }
   }
   // Quita logos/favicons y versiones reducidas (-400x250) para quedarnos con el original
-  const base = u => u.split("?")[0].replace("/smush-webp/", "/uploads/").replace("/thumbs/thumbs_", "/").replace(/\.(jpe?g|png)\.webp$/i, ".$1").replace(/-\d+x\d+(?=\.\w+$)/, "");
+  const base = u => u.split("?")[0].replace("/smush-webp/", "/uploads/").replace(/\/thumbs\/thumbs[-_]/, "/").replace(/\.(jpe?g|png)\.webp$/i, ".$1").replace(/-\d+x\d+(?=\.\w+$)/, "");
   const urls = [...new Set(found.map(base))].filter(u => !/logo|favicon|icon|cropped|patrocin|colabor/i.test(u));
   // Primero la portada (uploads), después la galería en orden
   urls.sort((a, b) => (a.includes("/gallery/") - b.includes("/gallery/")) || a.localeCompare(b, "es", { numeric: true }));
