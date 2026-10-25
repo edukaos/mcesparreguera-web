@@ -11,6 +11,9 @@ export default {
   instagram: "mcesparreguera",
   direccion: "", // TODO Edu: calle y número
   horario: "",   // TODO Edu: p. ej. "L–V 9:00–13:30 · 16:00–19:30 · S 10:00–13:30"
+  cp: "",        // TODO Edu: código postal (08292 es Esparreguera)
+  // Horario para Google (datos estructurados): [días, abre, cierra]. Ej.: [["Monday","Tuesday","Wednesday","Thursday","Friday"], "09:00", "13:30"]
+  horarioSchema: [],
   // URLs de la web antigua que no salen de la columna ficha_antigua de la hoja → página nueva
   redirecciones: { "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/" },
   financiacion: { tin: 0.0899, entradaPct: 10, meses: 72 }, // TODO Edu: tipo real de la financiera
