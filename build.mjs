@@ -129,25 +129,48 @@ async function loadCars() {
   return { cars, vendidos: all.filter(c => c.estado === "vendido") };
 }
 
-// Carpeta pública de Drive -> enlaces de sus fotos, ordenadas por nombre (01, 02, ... la primera es la portada).
-// Se lee la vista incrustada de la carpeta, que no necesita clave ni cuenta de Google.
+// Lee una carpeta pública de Drive con su vista incrustada, que no necesita clave ni cuenta de Google.
+// Devuelve sus fotos y subcarpetas ordenadas por nombre (01, 02, ... la primera foto es la portada).
+async function driveFolder(id) {
+  const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${id}`);
+  if (!res.ok) throw new Error(`${res.status}`);
+  const entries = [...(await res.text()).matchAll(/<a href="https:\/\/drive\.google\.com\/(file\/d|drive\/folders)\/([\w-]+)[^"]*"[^>]*>[\s\S]*?flip-entry-title">([^<]*)</g)]
+    .map(([, kind, id, name]) => ({ folder: kind !== "file/d", id, name: name.trim() }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es", { numeric: true }));
+  return {
+    fotos: entries.filter(e => !e.folder && !/\.(mp4|mov|avi|pdf|docx?|txt)$/i.test(e.name))
+      .map(e => `https://drive.google.com/thumbnail?id=${e.id}&sz=w1600`),
+    carpetas: entries.filter(e => e.folder),
+  };
+}
+
+// Fotos de Drive: la carpeta enlazada en la columna fotos, o si no, la subcarpeta de la carpeta madre
+// (cfg.carpetaFotos) que se llame como el id del coche ("seat-leon-2018" o "SEAT León 2018").
 async function expandDriveFolders(cars) {
+  let madre = [];
+  const madreId = (cfg.carpetaFotos || "").match(/([\w-]{20,})/)?.[1];
+  if (madreId) {
+    try {
+      madre = (await driveFolder(madreId)).carpetas;
+      if (!madre.length) throw new Error("sin subcarpetas o no pública");
+      console.log(`Carpeta madre de Drive: ${madre.length} carpetas`);
+    } catch (e) {
+      console.warn(`Carpeta madre de Drive no leída: compártela con "cualquier persona con el enlace" (${e.message})`);
+    }
+  }
   for (const c of cars) {
+    if (!c.fotos.length) {
+      const sub = madre.find(f => slug(f.name) === c.id);
+      if (sub) c.fotos = [DRIVE_FOLDER + sub.id];
+    }
     const out = [];
     for (const u of c.fotos) {
       if (!u.startsWith(DRIVE_FOLDER)) { out.push(u); continue; }
-      const id = u.slice(DRIVE_FOLDER.length);
       try {
-        const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${id}`);
-        if (!res.ok) throw new Error(`${res.status}`);
-        const html = await res.text();
-        const files = [...html.matchAll(/<a href="https:\/\/drive\.google\.com\/file\/d\/([\w-]+)[^"]*"[^>]*>[\s\S]*?flip-entry-title">([^<]*)</g)]
-          .map(([, fid, name]) => ({ fid, name }))
-          .filter(f => !/\.(mp4|mov|avi|pdf|docx?|txt)$/i.test(f.name))
-          .sort((a, b) => a.name.localeCompare(b.name, "es", { numeric: true }));
-        if (!files.length) throw new Error("vacía o no pública");
-        out.push(...files.map(f => `https://drive.google.com/thumbnail?id=${f.fid}&sz=w1600`));
-        console.log(`Carpeta de Drive (${c.id}): ${files.length} fotos`);
+        const { fotos } = await driveFolder(u.slice(DRIVE_FOLDER.length));
+        if (!fotos.length) throw new Error("vacía o no pública");
+        out.push(...fotos);
+        console.log(`Carpeta de Drive (${c.id}): ${fotos.length} fotos`);
       } catch (e) {
         console.warn(`Carpeta de Drive no leída (${c.id}): compártela con "cualquier persona con el enlace" (${e.message})`);
       }

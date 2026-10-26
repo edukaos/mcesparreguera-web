@@ -15,9 +15,13 @@ Una fila por coche en la Google Sheet. Columnas:
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
-| fotos | enlace de una carpeta de Drive, o enlaces separados por espacios | Lo más cómodo: una carpeta de Google Drive por coche, compartida con "cualquier persona con el enlace", y su enlace aquí. Salen todas las fotos de la carpeta ordenadas por nombre (la primera es la portada; ponerle `01` delante a la que se quiera de portada). También vale el enlace de cada foto o URLs de imágenes. Si se deja vacío, o la carpeta no es pública, se usan las fotos de `fotos/<id>/` del repositorio. |
+| fotos | vacío, enlace de una carpeta de Drive, o enlaces separados por espacios | Normalmente vacío: las fotos salen de la carpeta de Drive del coche (ver abajo). Si se pone el enlace de una carpeta, de cada foto o URLs de imágenes, se usan esos. Si no hay nada en Drive, se usan las fotos de `fotos/<id>/` del repositorio. |
 | descripcion | texto libre | Equipamiento y estado. Sale en la ficha y en Google: no poner notas internas. |
 | ficha_antigua | URL de la web antigua | Esa dirección redirige a la ficha nueva para no perder lo que Google ya tenía. |
+
+## Fotos
+
+En Google Drive hay una carpeta madre (su enlace va en `carpetaFotos` de `config.mjs`), compartida con "cualquier persona con el enlace". Dentro, una subcarpeta por coche con el mismo nombre que su `id` de la hoja (`seat-leon-2018`; también vale "SEAT León 2018"). Salen todas las fotos de la subcarpeta ordenadas por nombre: la primera es la portada (ponerle `01` delante a la que se quiera). Los cambios en Drive salen en la web en menos de una hora.
 
 Para publicar al momento sin esperar a la hora: en GitHub, pestaña Actions > "Publicar web" > Run workflow.
 
