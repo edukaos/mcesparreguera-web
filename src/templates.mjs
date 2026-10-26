@@ -58,7 +58,7 @@ const BIZ_ID = `${cfg.siteUrl}/#negocio`;
 const address = { "@type": "PostalAddress", streetAddress: cfg.direccion || undefined, addressLocality: "Esparreguera", addressRegion: "Barcelona", postalCode: cfg.cp || undefined, addressCountry: "ES" };
 const business = cars => ({
   "@type": "AutoDealer", "@id": BIZ_ID, name: `${cfg.nombre} Esparreguera`, alternateName: "MC Esparreguera",
-  description: `Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, rent a car y representante oficial de Aixam.`,
+  description: `Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, alquiler de coches y representante oficial de Aixam.`,
   url: `${cfg.siteUrl}/`, logo: `${cfg.siteUrl}/img/icon-512.png`, image: abs(cars.find(c => c.fotos[0])?.img?.[0]?.orig || cars.find(c => c.fotos[0])?.fotos[0]) || `${cfg.siteUrl}/img/logo.png`,
   telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde), address,
   areaServed: [{ "@type": "City", name: "Esparreguera" }, { "@type": "AdministrativeArea", name: "Baix Llobregat" }, { "@type": "Country", name: "España" }],
@@ -118,7 +118,7 @@ ${ld(jsonld)}
 ${body}
 </main>
 <footer class="g"><div class="in">
-  <div><b>${esc(cfg.nombre)}</b><p>Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, rent a car y representante oficial de Aixam.</p></div>
+  <div><b>${esc(cfg.nombre)}</b><p>Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, alquiler de coches y representante oficial de Aixam.</p></div>
   <div><b>Coches</b><a href="/#stock">${I.car}Coches en venta</a><a href="/#servicios">${I.wrench}Servicios</a></div>
   <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="/#contacto">${I.pin}Esparreguera, Barcelona</a></div>
   <div class="bottom">© ${new Date().getFullYear()} ${esc(cfg.nombre)} Esparreguera</div>
@@ -141,14 +141,14 @@ export function homePage(cars) {
 <section class="hero g" id="inicio"><div class="in">
   <div>
     <p class="eyebrow">Coches de ocasión en Esparreguera</p>
-    <h1 style="margin-top:16px">Encuentra tu coche. <em>Los papeles<svg viewBox="0 0 200 20" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true"><path d="M4 14C50 6 120 4 196 10"/></svg></em> los hacemos nosotros.</h1>
+    <h1 style="margin-top:16px">Encuentra tu coche. <em>El papeleo<svg viewBox="0 0 200 20" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true"><path d="M4 14C50 6 120 4 196 10"/></svg></em> corre de nuestra cuenta.</h1>
     <p class="lead">Somos un negocio familiar al pie de Montserrat. Revisamos cada coche, te lo dejamos probar sin prisa y te lo entregamos con la transferencia hecha.</p>
     <form class="finder" id="finder">
       <div class="f"><label for="fb">Tipo de coche</label><select id="fb"><option value="">Todos</option><option value="Berlina">Turismo</option>${tipos.has("SUV") ? '<option value="SUV">SUV</option>' : ""}${tipos.has("Furgoneta") ? '<option value="Furgoneta">Furgoneta y camper</option>' : ""}</select></div>
       <div class="f"><label for="fp">Presupuesto</label><select id="fp"><option value="">Cualquiera</option><option value="0-8000">Hasta 8.000 €</option><option value="8000-10000">8.000 a 10.000 €</option><option value="10000-999999">Más de 10.000 €</option></select></div>
       <button class="btn a" type="submit">Ver coches</button>
     </form>
-    <div class="mini"><span>${I.shield}Revisados en taller</span><span>${I.doc}Garantía 12 meses</span></div>
+    <div class="mini"><span>${I.shield}Revisados en taller</span><span>${I.doc}12 meses de garantía</span></div>
   </div>
   <div class="visual">
     <div class="blob"></div>
@@ -164,7 +164,7 @@ export function homePage(cars) {
 </div></div>
 
 <section class="g" id="stock" style="padding-bottom:88px"><div class="in">
-  <div class="sec-head"><div><p class="eyebrow">Stock actual</p><h2>Coches disponibles hoy</h2></div><p>Todos con transferencia incluida. Pulsa "Lo quiero ver" y te contestamos por WhatsApp. Consúltanos si necesitas que te llevemos el coche a tu casa.</p></div>
+  <div class="sec-head"><div><p class="eyebrow">Stock actual</p><h2>Coches disponibles hoy</h2></div><p>Todos con transferencia incluida. Pulsa "Lo quiero ver" y te contestamos por WhatsApp. ¿Necesitas que te llevemos el coche a casa? Pídenos presupuesto del transporte.</p></div>
   <div class="tools">
     <div class="seg" role="group" aria-label="Presupuesto">
       <button type="button" data-budget="" aria-pressed="true">Todos</button>
@@ -182,7 +182,7 @@ export function homePage(cars) {
     <select id="sort" aria-label="Ordenar"><option value="rel">Destacados</option><option value="pa">Precio: de menor a mayor</option><option value="pd">Precio: de mayor a menor</option><option value="km">Menos kilómetros</option><option value="yr">Más nuevos</option></select>
   </div>
   <div class="grid" id="grid">${cars.map(card).join("\n")}
-    <div class="empty" id="empty" hidden>No tenemos ahora un coche así. <a href="${wa("Hola, busco un coche que no está en la web. Te cuento:")}" target="_blank" rel="noopener">Dinos qué buscas</a> y te avisamos cuando entre uno.</div>
+    <div class="empty" id="empty" hidden>No tenemos ahora un coche así. <a href="${wa("Hola, busco un coche que no está en la web. Os cuento:")}" target="_blank" rel="noopener">Dinos qué buscas</a> y te avisamos cuando entre uno.</div>
   </div>
 </div></section>
 
@@ -206,24 +206,24 @@ ${star ? `<section class="g"><div class="in">
     <ol>
       <li><b>Elige y escríbenos</b><span>Pulsa "Lo quiero ver" en el coche que te guste. Te contestamos por WhatsApp con fotos y vídeo.</span></li>
       <li><b>Ven a probarlo</b><span>Te lo tenemos preparado el día que nos digas, aquí en Esparreguera.</span></li>
-      <li><b>Llévatelo con todo hecho</b><span>Firmamos, hacemos la transferencia y te vas conduciendo. Si lo necesitas, te lo llevamos a casa.</span></li>
+      <li><b>Llévatelo con todo hecho</b><span>Firmamos, hacemos la transferencia y sales conduciendo.</span></li>
     </ol>
   </div>
 </section>
 
 <section class="g" id="servicios" style="padding-bottom:88px"><div class="in">
-  <div class="sec-head"><div><p class="eyebrow">Más que un compraventa</p><h2>Todo lo de tu coche, en un sitio</h2></div></div>
+  <div class="sec-head"><div><p class="eyebrow">Más que una compraventa</p><h2>Todo lo de tu coche, en un sitio</h2></div></div>
   <div class="svcs">
     <div class="svc"><span class="ic">${I.doc}</span><h3>Gestoría</h3><p>Transferencias, informes DGT, duplicados, matriculaciones y bajas.</p></div>
     <div class="svc"><span class="ic">${I.key}</span><h3>Coches sin carnet</h3><p>Representantes oficiales de Aixam. Desde los 15 años con licencia AM.</p></div>
-    <div class="svc"><span class="ic">${I.cal}</span><h3>Rent a car</h3><p>Alquiler de vehículos por días o por semanas.</p></div>
+    <div class="svc"><span class="ic">${I.cal}</span><h3>Alquiler de coches</h3><p>Por días o por semanas.</p></div>
   </div>
 </div></section>
 
 <section class="g" style="padding-bottom:88px"><div class="in faq">
-  <div class="txt"><p class="eyebrow">Dudas</p><h2>Lo que más nos preguntáis</h2><p>¿No está tu pregunta? Escríbenos por WhatsApp y te respondemos enseguida.</p></div>
+  <div class="txt"><p class="eyebrow">Dudas</p><h2>Lo que más nos preguntáis</h2><p>¿No encuentras tu duda? Escríbenos por WhatsApp y te respondemos enseguida.</p></div>
   <div>
-    <details open><summary>¿Puedo comprar sin ir a Esparreguera?</summary><p>Sí. Te enviamos vídeo del coche por WhatsApp, firmamos a distancia y, si lo necesitas, te lo llevamos a casa. Consúltanos.</p></details>
+    <details open><summary>¿Puedo comprar sin ir a Esparreguera?</summary><p>Sí. Te enviamos vídeo del coche por WhatsApp, firmamos a distancia. Si necesitas que te lo llevemos a casa, te damos presupuesto del transporte: no está incluido en el precio.</p></details>
     <details><summary>¿Los coches tienen garantía?</summary><p>Sí, todos tienen la garantía legal de 12 meses de un coche de ocasión vendido por un profesional, y salen revisados de taller.</p></details>
     <details><summary>¿Quién hace el cambio de nombre?</summary><p>Nuestra gestoría. Está incluido en el precio y te damos el permiso de circulación a tu nombre.</p></details>
   </div>
@@ -235,7 +235,7 @@ ${star ? `<section class="g"><div class="in">
     <dl>
       <dt>WhatsApp</dt><dd><a href="${wa("Hola")}" target="_blank" rel="noopener">${WA_TXT}</a></dd>
       <dt>Teléfono</dt><dd><a href="tel:+34${cfg.telefono}">${TEL}</a></dd>
-      <dt>Email</dt><dd><a href="mailto:${cfg.email}">${cfg.email}</a></dd>
+      <dt>Correo</dt><dd><a href="mailto:${cfg.email}">${cfg.email}</a></dd>
       <dt>Dirección</dt><dd>${esc(cfg.direccion ? `${cfg.direccion}, ${cfg.ciudad}` : cfg.ciudad)}</dd>
       <dt>Horario</dt><dd>${esc(cfg.horario || "Con cita previa")}</dd>
     </dl>
@@ -303,7 +303,7 @@ export function carPage(c, cars) {
       <span class="price">${eur(c.precio)}</span>
       <a class="btn w" href="${waCar(c)}" target="_blank" rel="noopener">${I.wa}Preguntar por WhatsApp</a>
       <a class="btn a" href="${wa(`Hola, quiero probar el ${title(c)} (${c.year}). ¿Qué día puedo pasar?`)}" target="_blank" rel="noopener">${I.cal}Reservar prueba</a>
-      <p class="small">${I.truck}Consúltanos si necesitas que te llevemos el coche a tu casa.</p>
+      <p class="small">${I.truck}¿Te lo llevamos a casa? Pídenos presupuesto del transporte.</p>
       <div class="seller"><span class="mk">MC</span><span><b>${esc(cfg.nombre)}</b><span>Esparreguera · vendiendo coches desde ${cfg.desde}</span></span></div>
     </aside>
   </div>
