@@ -31,6 +31,8 @@ for (const r of rows) {
       if (!visited.has(next)) queue.push(next);
     }
   }
+  // FOTOS="url1 url2 …": enlaces directos de las fotos, por si la ficha no se puede leer
+  if (process.env.FOTOS) found.push(...process.env.FOTOS.split(/\s+/).filter(Boolean));
   // Quita logos/favicons y versiones reducidas (-400x250) para quedarnos con el original
   const base = u => u.split("?")[0].replace("/smush-webp/", "/uploads/").replace(/\/thumbs\/thumbs[-_]/, "/").replace(/\.(jpe?g|png)\.webp$/i, ".$1").replace(/-\d+x\d+(?=\.\w+$)/, "");
   const urls = [...new Set(found.map(base))].filter(u => !/logo|favicon|icon|cropped|patrocin|colabor/i.test(u));

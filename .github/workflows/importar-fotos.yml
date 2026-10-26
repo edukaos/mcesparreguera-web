@@ -7,6 +7,10 @@ on:
         description: "id de un solo coche (vacío = todos)"
         required: false
         default: ""
+      fotos:
+        description: "enlaces directos de fotos, separados por espacios (opcional)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -22,6 +26,7 @@ jobs:
       - run: node tools/importar-fotos.mjs
         env:
           SOLO: ${{ inputs.solo }}
+          FOTOS: ${{ inputs.fotos }}
       # Reduce las fotos a 1600 px para que la web cargue rápido
       - run: |
           pip install --quiet pillow
