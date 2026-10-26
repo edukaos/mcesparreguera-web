@@ -19,7 +19,11 @@ for (const r of rows) {
     if (visited.has(u)) continue;
     visited.add(u);
     let html = "";
-    try { html = await (await fetch(u, { headers: UA })).text(); } catch { continue; }
+    try {
+      const res = await fetch(u, { headers: UA });
+      html = await res.text();
+      if (process.env.SOLO) console.log(`${u}: ${res.status}, ${html.length} caracteres, ${(html.match(/wp-content[^"'\s)]+\.(?:jpe?g|png|webp)/gi) || []).slice(0, 5).join(" ")}`);
+    } catch (e) { console.warn(`${u}: ${e.message}`); continue; }
     found.push(...[...html.matchAll(/https?:\/\/[^"'\s)]+?\/wp-content\/(?:uploads|smush-webp|gallery)\/[^"'\s)]+?\.(?:jpe?g|png|webp)/gi)].map(m => m[0]));
     // Los enlaces del navegador de imágenes van entre comillas simples y a veces son relativos
     for (const m of html.matchAll(/nggallery\/(image|page)\/([^"'\s\/<>]+)/gi)) {
