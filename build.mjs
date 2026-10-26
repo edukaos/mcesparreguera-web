@@ -47,8 +47,11 @@ const slug = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase()
   .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const num = s => { const n = Number(String(s).replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".")); return s && !isNaN(n) ? n : null; };
 
-// Acepta enlaces de Google Drive ("compartir") o URLs directas a imágenes.
+// Acepta enlaces de Google Drive ("compartir") de una foto o de una carpeta, o URLs directas a imágenes.
+const DRIVE_FOLDER = "drive-carpeta:";
 function photoUrl(u) {
+  const f = u.match(/\/folders\/([\w-]{20,})/) || u.match(/folderview\?id=([\w-]{20,})/);
+  if (f) return DRIVE_FOLDER + f[1];
   const m = u.match(/\/d\/([\w-]{20,})/) || u.match(/[?&]id=([\w-]{20,})/);
   return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600` : u;
 }
@@ -126,19 +129,75 @@ async function loadCars() {
   return { cars, vendidos: all.filter(c => c.estado === "vendido") };
 }
 
+// Lee una carpeta pública de Drive con su vista incrustada, que no necesita clave ni cuenta de Google.
+// Devuelve sus fotos y subcarpetas ordenadas por nombre (01, 02, ... la primera foto es la portada).
+async function driveFolder(id) {
+  const res = await fetch(`https://drive.google.com/embeddedfolderview?id=${id}`);
+  if (!res.ok) throw new Error(`${res.status}`);
+  const entries = [...(await res.text()).matchAll(/<a href="https:\/\/drive\.google\.com\/(file\/d|drive\/folders)\/([\w-]+)[^"]*"[^>]*>[\s\S]*?flip-entry-title">([^<]*)</g)]
+    .map(([, kind, id, name]) => ({ folder: kind !== "file/d", id, name: name.trim() }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es", { numeric: true }));
+  return {
+    fotos: entries.filter(e => !e.folder && !/\.(mp4|mov|avi|pdf|docx?|txt)$/i.test(e.name))
+      .map(e => `https://drive.google.com/thumbnail?id=${e.id}&sz=w1600`),
+    carpetas: entries.filter(e => e.folder),
+  };
+}
+
+// Fotos de Drive: la carpeta enlazada en la columna fotos, o si no, la subcarpeta de la carpeta madre
+// (cfg.carpetaFotos) que se llame como el id del coche ("seat-leon-2018" o "SEAT León 2018").
+async function expandDriveFolders(cars) {
+  let madre = [];
+  const madreId = (cfg.carpetaFotos || "").match(/([\w-]{20,})/)?.[1];
+  if (madreId) {
+    try {
+      madre = (await driveFolder(madreId)).carpetas;
+      if (!madre.length) throw new Error("sin subcarpetas o no pública");
+      console.log(`Carpeta madre de Drive: ${madre.length} carpetas`);
+    } catch (e) {
+      console.warn(`Carpeta madre de Drive no leída: compártela con "cualquier persona con el enlace" (${e.message})`);
+    }
+  }
+  for (const c of cars) {
+    if (!c.fotos.length) {
+      const sub = madre.find(f => slug(f.name) === c.id);
+      if (sub) c.fotos = [DRIVE_FOLDER + sub.id];
+    }
+    const out = [];
+    for (const u of c.fotos) {
+      if (!u.startsWith(DRIVE_FOLDER)) { out.push(u); continue; }
+      try {
+        const { fotos } = await driveFolder(u.slice(DRIVE_FOLDER.length));
+        if (!fotos.length) throw new Error("vacía o no pública");
+        out.push(...fotos);
+        console.log(`Carpeta de Drive (${c.id}): ${fotos.length} fotos`);
+      } catch (e) {
+        console.warn(`Carpeta de Drive no leída (${c.id}): compártela con "cualquier persona con el enlace" (${e.message})`);
+      }
+    }
+    c.fotos = out;
+  }
+}
+
 // Descarga las fotos a dist/fotos para no depender de Drive al navegar. Si falla, usa la URL original.
 async function localizePhotos(cars) {
   await mkdir(`${DIST}/fotos`, { recursive: true });
+  await mkdir(".cache/drive", { recursive: true });
   for (const c of cars) {
     c.fotos = await Promise.all(c.fotos.map(async (u, i) => {
+      const hash = createHash("md5").update(u).digest("hex").slice(0, 6), name = `${c.id}-${i + 1}-${hash}`;
+      // Las fotos de Drive se guardan en .cache/drive para no descargarlas otra vez cada hora.
+      const cached = u.startsWith("https://drive.google.com/thumbnail") && `.cache/drive/${hash}`;
       try {
+        if (cached) try { await copyFile(cached, `${DIST}/fotos/${name}.jpg`); return `/fotos/${name}.jpg`; } catch {}
         const res = await fetch(u, { redirect: "follow" });
         const type = res.headers.get("content-type") || "";
         if (!res.ok || !type.startsWith("image/")) throw new Error(type);
         const ext = type.includes("png") ? "png" : type.includes("webp") ? "webp" : "jpg";
-        const name = `${c.id}-${i + 1}-${createHash("md5").update(u).digest("hex").slice(0, 6)}.${ext}`;
-        await writeFile(`${DIST}/fotos/${name}`, Buffer.from(await res.arrayBuffer()));
-        return `/fotos/${name}`;
+        const buf = Buffer.from(await res.arrayBuffer());
+        await writeFile(`${DIST}/fotos/${name}.${ext}`, buf);
+        if (cached) await writeFile(cached, buf);
+        return `/fotos/${name}.${ext}`;
       } catch (e) {
         console.warn(`Foto no descargada (${c.id}): ${u}`);
         return u;
@@ -205,6 +264,7 @@ const page = async (path, html) => {
 const { cars, vendidos } = await loadCars();
 await rm(DIST, { recursive: true, force: true });
 await mkdir(DIST, { recursive: true });
+await expandDriveFolders(cars);
 await localizePhotos(cars);
 await repoPhotos(cars);
 await optimizePhotos(cars);

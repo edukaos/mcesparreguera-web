@@ -15,15 +15,19 @@ Una fila por coche en la Google Sheet. Columnas:
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
-| fotos | enlaces separados por espacios | Enlaces de "Compartir" de Google Drive (con acceso "cualquiera con el enlace") o URLs de imágenes. La primera es la portada. Si se deja vacío se usan las fotos de `fotos/<id>/` del repositorio. |
+| fotos | vacío, enlace de una carpeta de Drive, o enlaces separados por espacios | Normalmente vacío: las fotos salen de la carpeta de Drive del coche (ver abajo). Si se pone el enlace de una carpeta, de cada foto o URLs de imágenes, se usan esos. Si no hay nada en Drive, se usan las fotos de `fotos/<id>/` del repositorio. |
 | descripcion | texto libre | Equipamiento y estado. Sale en la ficha y en Google: no poner notas internas. |
 | ficha_antigua | URL de la web antigua | Esa dirección redirige a la ficha nueva para no perder lo que Google ya tenía. |
+
+## Fotos
+
+En Google Drive hay una carpeta madre (su enlace va en `carpetaFotos` de `config.mjs`), compartida con "cualquier persona con el enlace". Dentro, una subcarpeta por coche con el mismo nombre que su `id` de la hoja (`seat-leon-2018`; también vale "SEAT León 2018"). Salen todas las fotos de la subcarpeta ordenadas por nombre: la primera es la portada (ponerle `01` delante a la que se quiera). Los cambios en Drive salen en la web en menos de una hora.
 
 Para publicar al momento sin esperar a la hora: en GitHub, pestaña Actions > "Publicar web" > Run workflow.
 
 ## Configuración
 
-- Datos del negocio (teléfonos, dirección, horario, tipo de financiación): `config.mjs`.
+- Datos del negocio (teléfono, dirección, horario): `config.mjs`.
 - Enlace de la hoja: variable del repositorio `SHEET_CSV_URL` (Settings > Secrets and variables > Actions > Variables), con el enlace de Archivo > Compartir > Publicar en la web > CSV.
 - Hoja privada (recomendado): pega `tools/hoja-privada.gs` en la hoja (Extensiones > Apps Script), cambia la clave e impleméntalo como aplicación web (ejecutar como tú, acceso: cualquier usuario). Guarda el enlace `.../exec?clave=TU_CLAVE` como secreto `SHEET_CSV_URL` (Settings > Secrets and variables > Actions > Secrets). Así la hoja puede estar en "Restringido".
 - Alternativa: secreto `GOOGLE_SA_KEY` con la clave JSON de una cuenta de servicio con la Google Sheets API activada y la hoja compartida con su email como Lector (algunas organizaciones de Google bloquean crear claves).

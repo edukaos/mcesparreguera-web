@@ -1,4 +1,4 @@
-// Interacción de la web: filtros del stock, calculadora de cuota, tasación por WhatsApp y galería.
+// Interacción de la web: filtros del stock, tasación por WhatsApp y galería.
 (() => {
   const $ = id => document.getElementById(id);
   const WA = document.querySelector(".mbar .btn.w, header .btn.w")?.href.match(/wa\.me\/(\d+)/)?.[1];
@@ -52,22 +52,6 @@
       e.preventDefault(); st.tipo = $("fb").value; st.budget = $("fp").value; st.marca = ""; render();
       $("stock").scrollIntoView({ behavior: "smooth" });
     });
-  }
-
-  // Calculadora de cuota
-  if ($("fc")) {
-    const tin = +$("ftin").dataset.tin;
-    const calc = () => {
-      const price = +$("fc").value, name = $("fc").selectedOptions[0].dataset.name;
-      const ent = +$("fe").value, m = +$("fm").value, r = tin / 12;
-      const q = Math.round(price * (1 - ent / 100) * r / (1 - Math.pow(1 + r, -m)));
-      $("fev").textContent = `${ent} % · ${eur(price * ent / 100)}`;
-      $("fmv").textContent = `${m} meses`;
-      $("fq").textContent = q;
-      $("fwa").href = wa(`Hola, quiero financiar el ${name} (${eur(price)}) con ${ent} % de entrada a ${m} meses. Cuota orientativa ${q} €/mes.`);
-    };
-    ["fc", "fe", "fm"].forEach(id => $(id).addEventListener("input", calc));
-    calc();
   }
 
   // Tasación: abre WhatsApp con los datos escritos

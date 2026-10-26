@@ -8,13 +8,8 @@ const kmf = n => n == null ? "Consultar" : n.toLocaleString("es-ES", { useGroupi
 const phoneFmt = p => p.replace(/^34/, "").replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3");
 const TEL = phoneFmt(cfg.telefono), WA_TXT = phoneFmt(cfg.whatsapp);
 export const title = c => `${c.marca} ${c.modelo}`;
-export function cuota(price, { tin, entradaPct, meses } = cfg.financiacion) {
-  const capital = price * (1 - entradaPct / 100), r = tin / 12;
-  return Math.round(capital * r / (1 - Math.pow(1 + r, -meses)));
-}
 const wa = text => `https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent(text)}`;
 const waCar = c => wa(`Hola, me interesa el ${title(c)} ${c.version} (${c.year}) de ${eur(c.precio)}. ¿Sigue disponible?`);
-const tinTxt = (cfg.financiacion.tin * 100).toLocaleString("es-ES");
 const years = new Date().getFullYear() - cfg.desde;
 
 const SIL = {
@@ -51,7 +46,7 @@ function card(c) {
     <div class="bd">
       <h3><a href="/coches/${c.id}/">${esc(title(c))}</a></h3><div class="v">${esc(c.version)}</div>
       <div class="facts"><span>${kmf(c.km)}</span><span>${esc(c.combustible)}</span><span>${esc(c.cambio)}</span></div>
-      <div class="pr"><b>${eur(c.precio)}</b><span>o desde<br><strong>${cuota(c.precio)} €/mes</strong></span></div>
+      <div class="pr"><b>${eur(c.precio)}</b></div>
       <div class="act"><a class="btn o sm" href="/coches/${c.id}/">Ver coche</a><a class="btn a sm" href="${waCar(c)}" target="_blank" rel="noopener">Lo quiero ver</a></div>
     </div></article>`;
 }
@@ -68,7 +63,7 @@ const business = cars => ({
   telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde), address,
   areaServed: [{ "@type": "City", name: "Esparreguera" }, { "@type": "AdministrativeArea", name: "Baix Llobregat" }, { "@type": "Country", name: "España" }],
   priceRange: cars.length ? `${eur(Math.min(...cars.map(c => c.precio)))} - ${eur(Math.max(...cars.map(c => c.precio)))}` : undefined,
-  currenciesAccepted: "EUR", paymentAccepted: "Efectivo, transferencia, financiación",
+  currenciesAccepted: "EUR", paymentAccepted: "Efectivo, transferencia",
   openingHoursSpecification: cfg.horarioSchema?.length ? cfg.horarioSchema.map(([days, opens, closes]) => ({ "@type": "OpeningHoursSpecification", dayOfWeek: days, opens, closes })) : undefined,
   contactPoint: { "@type": "ContactPoint", telephone: `+34${cfg.whatsapp.replace(/^34/, "")}`, contactType: "sales", availableLanguage: ["es", "ca"] },
   knowsAbout: ["Coches de segunda mano", "Coches sin carnet Aixam", "Gestoría de tráfico", "Grúa", "Alquiler de coches"],
@@ -121,7 +116,7 @@ ${ld(jsonld)}
 <header class="top g"><div class="in">
   <a class="brand" href="/"><img src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
   <button class="menu-t" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <nav class="main" id="nav" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#vender">Vender mi coche</a><a href="/#financiacion">Financiación</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
+  <nav class="main" id="nav" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#vender">Vender mi coche</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
   <a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">${I.wa}<span>Escríbenos</span></a>
 </div></header>
 <main id="main">
@@ -129,7 +124,7 @@ ${body}
 </main>
 <footer class="g"><div class="in">
   <div><b>${esc(cfg.nombre)}</b><p>Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, grúa, rent a car y representante oficial de Aixam.</p></div>
-  <div><b>Coches</b><a href="/#stock">${I.car}Coches en venta</a><a href="/#vender">${I.tag}Vender mi coche</a><a href="/#financiacion">${I.euro}Financiación</a><a href="/#servicios">${I.wrench}Servicios</a></div>
+  <div><b>Coches</b><a href="/#stock">${I.car}Coches en venta</a><a href="/#vender">${I.tag}Vender mi coche</a><a href="/#servicios">${I.wrench}Servicios</a></div>
   <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="/#contacto">${I.pin}Esparreguera, Barcelona</a></div>
   <div class="bottom">© ${new Date().getFullYear()} ${esc(cfg.nombre)} Esparreguera</div>
 </div></footer>
@@ -220,19 +215,6 @@ ${star ? `<section class="g"><div class="in">
   </div>
 </div></section>` : ""}
 
-<section class="sec g" id="financiacion"><div class="in fin">
-  <div class="txt"><p class="eyebrow">Financiación</p><h2>Llévatelo hoy y págalo poco a poco</h2>
-    <p>Trabajamos con financieras de confianza. Tú eliges la entrada y el plazo, y nosotros nos ocupamos del papeleo.</p>
-    <ul><li>Entrada y plazo a tu medida</li><li>Puedes entregar tu coche como entrada</li><li>Te ayudamos con toda la documentación</li></ul></div>
-  <div class="calc">
-    <div><label for="fc">Coche</label><select id="fc" style="margin-top:8px">${cars.map(c => `<option value="${c.precio}" data-name="${esc(title(c))}">${esc(title(c))} · ${eur(c.precio)}</option>`).join("")}</select></div>
-    <div><label for="fe">Entrada <span id="fev"></span></label><input id="fe" type="range" min="0" max="50" step="5" value="${cfg.financiacion.entradaPct}"></div>
-    <div><label for="fm">Plazo <span id="fmv"></span></label><input id="fm" type="range" min="24" max="96" step="12" value="${cfg.financiacion.meses}"></div>
-    <div class="out"><div><small>Cuota mensual estimada</small><br><b id="fq"></b> <small>€/mes</small></div><a class="btn a" id="fwa" target="_blank" rel="noopener" href="${wa("Hola, quiero información sobre financiación")}">Solicitar</a></div>
-    <p class="fine" id="ftin" data-tin="${cfg.financiacion.tin}">Cálculo orientativo con TIN ${tinTxt} %, sujeto a aprobación de la financiera.</p>
-  </div>
-</div></section>
-
 <section class="steps g"><svg class="mtn" viewBox="0 0 1440 220" preserveAspectRatio="none" fill="currentColor" aria-hidden="true"><path d="M0 220V170l80-30 50 20 60-70 40 40 50-90 40 60 40-80 50 70 40-50 50 60 40-90 50 80 40-40 60 70 50-60 40 40 70-40 60 30 80-50 70 40 90-30 80 30 100-20 120 40v80Z"/></svg>
   <div class="in sec">
     <p class="eyebrow">Así de fácil</p>
@@ -321,7 +303,7 @@ ${star ? `<section class="g"><div class="in">
   };
   return layout({
     pageTitle: "Coches de segunda mano en Esparreguera | Multiservice Car",
-    description: `${cars.length} coches de ocasión revisados en Esparreguera (Barcelona), con transferencia incluida, garantía, financiación y entrega en toda España. Desde ${cfg.desde}.`,
+    description: `${cars.length} coches de ocasión revisados en Esparreguera (Barcelona), con transferencia incluida, garantía y entrega en toda España. Desde ${cfg.desde}.`,
     path: "/", body, jsonld, image: img0(heroCar) && { ...img0(heroCar), alt: carAlt(heroCar) },
   });
 }
@@ -353,20 +335,18 @@ export function carPage(c, cars) {
       <div class="incl"><h2>Incluido en el precio</h2><ul><li>Transferencia y cambio de nombre</li><li>Informe de la DGT</li><li>Revisión en taller</li><li>12 meses de garantía legal</li></ul></div>
     </div>
     <aside class="buy">
-      <span class="eyebrow">${c.estado === "reservado" ? "Reservado" : "Precio al contado"}</span>
+      <span class="eyebrow">${c.estado === "reservado" ? "Reservado" : "Precio"}</span>
       <span class="price">${eur(c.precio)}</span>
-      <div class="cuota"><span>O financiado desde</span><b>${cuota(c.precio)} €/mes</b></div>
       <a class="btn w" href="${waCar(c)}" target="_blank" rel="noopener">${I.wa}Preguntar por WhatsApp</a>
       <a class="btn a" href="${wa(`Hola, quiero probar el ${title(c)} (${c.year}). ¿Qué día puedo pasar?`)}" target="_blank" rel="noopener">${I.cal}Reservar prueba</a>
       <a class="btn o" href="/#vender">${I.swap}Entregar mi coche a cambio</a>
-      <p class="small">Cuota orientativa: ${cfg.financiacion.entradaPct} % de entrada a ${cfg.financiacion.meses} meses, TIN ${tinTxt} %.</p>
       <div class="seller"><span class="mk">MC</span><span><b>${esc(cfg.nombre)}</b><span>Esparreguera · vendiendo coches desde ${cfg.desde}</span></span></div>
     </aside>
   </div>
   <section class="similar" style="padding-block:40px 20px"><h2>También te pueden interesar</h2><div class="grid">${sim.map(card).join("")}</div></section>
 </div></div>`;
   const url = `${cfg.siteUrl}/coches/${c.id}/`;
-  const desc = `${title(c)} ${c.version}${c.year ? `, ${c.year}` : ""}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)} o desde ${cuota(c.precio)} €/mes. Transferencia y garantía incluidas. En Esparreguera (Barcelona).`;
+  const desc = `${title(c)} ${c.version}${c.year ? `, ${c.year}` : ""}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)}. Transferencia y garantía incluidas. En Esparreguera (Barcelona).`;
   const jsonld = {
     "@context": "https://schema.org",
     "@graph": [
