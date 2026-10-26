@@ -1,7 +1,12 @@
 name: Importar fotos de la web antigua
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      solo:
+        description: "id de un solo coche (vacío = todos)"
+        required: false
+        default: ""
 
 permissions:
   contents: write
@@ -15,13 +20,15 @@ jobs:
         with:
           node-version: 22
       - run: node tools/importar-fotos.mjs
+        env:
+          SOLO: ${{ inputs.solo }}
       # Reduce las fotos a 1600 px para que la web cargue rápido
       - run: |
           pip install --quiet pillow
           python3 -c "
           import glob
           from PIL import Image, ImageOps
-          for f in glob.glob('fotos/*/*.jpg'):
+          for f in glob.glob('fotos/' + ('${{ inputs.solo }}' or '*') + '/*.jpg'):
               im = ImageOps.exif_transpose(Image.open(f)).convert('RGB')
               im.thumbnail((1600, 1600))
               im.save(f, quality=80, optimize=True, progressive=True)

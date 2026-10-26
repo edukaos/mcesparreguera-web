@@ -1,5 +1,5 @@
 // Descarga las fotos de cada coche desde su ficha en la web antigua (columna ficha_antigua de data/coches.csv)
-// y las guarda en fotos/<id>/01.jpg, 02.jpg… Uso: node tools/importar-fotos.mjs
+// y las guarda en fotos/<id>/01.jpg, 02.jpg… Uso: node tools/importar-fotos.mjs  (SOLO=<id> para un solo coche)
 import { readFile, writeFile, mkdir, rm } from "node:fs/promises";
 import { createHash } from "node:crypto";
 
@@ -10,7 +10,7 @@ const UA = { "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 C
 
 for (const r of rows) {
   const id = r[col("id")], url = r[r.length - 1];
-  if (!url?.startsWith("http")) continue;
+  if (!url?.startsWith("http") || (process.env.SOLO && id !== process.env.SOLO)) continue;
   // La galería (NextGEN) solo pinta unas pocas fotos por página: recorremos también
   // sus páginas de imagen (/nggallery/image/…) y de paginación (/nggallery/page/N)
   const found = [], visited = new Set(), queue = [url];
