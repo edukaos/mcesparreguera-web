@@ -1,4 +1,4 @@
-/* Web de Multiservice Car · diseño "Cercano". Tema claro y oscuro (sigue al móvil u ordenador, o el botón de la cabecera).
+/* Web de Multiservice Car · diseño "Cercano". Tema claro por defecto y oscuro con el botón de la cabecera.
    Portada por secciones y una página por coche, generadas por build.mjs. */
 /* Fuentes servidas desde la propia web (más rápido que Google Fonts) */
 @font-face{font-family:"Bricolage Grotesque";font-style:normal;font-weight:500 800;font-display:swap;src:url(fonts/bricolage-grotesque-latin-ext.woff2) format("woff2");unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF}
@@ -31,12 +31,7 @@
   --glass:#ffffffe6;   /* botones sobre las fotos */
   color-scheme:light;
 }
-/* Tema oscuro: el mismo en los dos bloques (automático según el sistema, o elegido con el botón) */
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --page:#0f1519;--surf:#172128;--mint:#1f2b34;--mint-2:#2c3b46;--deep:#22303a;--deep-t:#d3dee7;--mtn:#2c3b46;
-  --green:#7db6f0;--ink:#e8eef2;--muted:#a3b1bb;--line:#2a3640;--acc:#2a72c4;--acc-2:#2468b5;--acc-t:#7db6f0;--acc-soft:#1b2d42;
-  --wa:#168548;--sil:#33424d;--glass:#1b252ce6;--shadow:0 24px 48px -28px #000c;color-scheme:dark;
-}}
+/* Tema oscuro: solo si el visitante lo elige con el botón de la cabecera */
 :root[data-theme="dark"]{
   --page:#0f1519;--surf:#172128;--mint:#1f2b34;--mint-2:#2c3b46;--deep:#22303a;--deep-t:#d3dee7;--mtn:#2c3b46;
   --green:#7db6f0;--ink:#e8eef2;--muted:#a3b1bb;--line:#2a3640;--acc:#2a72c4;--acc-2:#2468b5;--acc-t:#7db6f0;--acc-soft:#1b2d42;
@@ -369,16 +364,8 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .brand .lo-d{display:none}
 :root[data-theme="dark"] .brand .lo-l{display:none}
 :root[data-theme="dark"] .brand .lo-d{display:block}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .brand .lo-l{display:none}
-  :root:not([data-theme="light"]) .brand .lo-d{display:block}
-}
 .theme-t{width:46px;height:46px;border-radius:13px;border:1px solid var(--line);background:var(--surf);cursor:pointer;display:grid;place-items:center;flex:none;color:var(--ink);padding:0}
 .theme-t svg{width:21px;height:21px}
 .theme-t .sun{display:none}
 :root[data-theme="dark"] .theme-t .sun{display:block}
 :root[data-theme="dark"] .theme-t .moon{display:none}
-@media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]) .theme-t .sun{display:block}
-  :root:not([data-theme="light"]) .theme-t .moon{display:none}
-}
