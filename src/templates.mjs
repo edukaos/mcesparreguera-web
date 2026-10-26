@@ -142,19 +142,19 @@ export function homePage(cars) {
   <div>
     <p class="eyebrow">Coches de ocasión en Esparreguera</p>
     <h1 style="margin-top:16px">Encuentra tu coche <em>de confianza<svg viewBox="0 0 200 20" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" aria-hidden="true"><path d="M4 14C50 6 120 4 196 10"/></svg></em> en Esparreguera.</h1>
-    <p class="lead">Somos un negocio familiar al pie de Montserrat. Revisamos cada coche, te lo dejamos probar sin prisa y te acompañamos en todo el proceso.</p>
+    <p class="lead">Somos un negocio familiar al pie de Montserrat. Te dejamos probar cada coche sin prisa y te acompañamos en todo el proceso.</p>
     <form class="finder" id="finder">
       <div class="f"><label for="fb">Tipo de coche</label><select id="fb"><option value="">Todos</option><option value="Berlina">Turismo</option>${tipos.has("SUV") ? '<option value="SUV">SUV</option>' : ""}${tipos.has("Furgoneta") ? '<option value="Furgoneta">Furgoneta y camper</option>' : ""}</select></div>
       <div class="f"><label for="fp">Presupuesto</label><select id="fp"><option value="">Cualquiera</option><option value="0-8000">Hasta 8.000 €</option><option value="8000-10000">8.000 a 10.000 €</option><option value="10000-999999">Más de 10.000 €</option></select></div>
       <button class="btn a" type="submit">Ver coches</button>
     </form>
-    <div class="mini"><span>${I.shield}Revisados en taller</span><span>${I.doc}12 meses de garantía</span></div>
+    <div class="mini"><span>${I.cal}Prueba sin compromiso</span><span>${I.doc}Gestoría propia</span></div>
   </div>
   <div class="visual">
     <div class="blob"></div>
     <div class="main">${imgTag(img0(heroCar), carAlt(heroCar), { eager: true, sizes: SIZES.half })}</div>
     <div class="year-badge"><span><b>+${years}</b>años<br>contigo</span></div>
-    <div class="float f1"><span class="ic">${I.shield}</span><span><b>Revisado y garantizado</b><small>Antes de entregarlo</small></span></div>
+    <div class="float f1"><span class="ic">${I.shield}</span><span><b>Negocio familiar</b><small>En Esparreguera desde ${cfg.desde}</small></span></div>
     ${nuevo ? `<a class="float f2" href="/coches/${nuevo.id}/">${imgTag(img0(nuevo), "", { sizes: SIZES.thumb })}<span><small>Recién llegado</small><b>${esc(title(nuevo))}</b><span class="pr">${eur(nuevo.precio)}</span></span></a>` : ""}
   </div>
 </div></section>
@@ -224,7 +224,7 @@ ${star ? `<section class="g"><div class="in">
   <div class="txt"><p class="eyebrow">Dudas</p><h2>Lo que más nos preguntáis</h2><p>¿No encuentras tu duda? Escríbenos por WhatsApp y te respondemos enseguida.</p></div>
   <div>
     <details open><summary>¿Puedo comprar sin ir a Esparreguera?</summary><p>Sí. Te enviamos fotos y vídeo del coche por WhatsApp y podemos firmar a distancia. Si necesitas que te lo llevemos a casa, te damos presupuesto del transporte: no está incluido en el precio.</p></details>
-    <details><summary>¿Los coches tienen garantía?</summary><p>Sí, todos tienen la garantía legal de 12 meses de un coche de ocasión vendido por un profesional, y salen revisados de taller.</p></details>
+    <details><summary>¿Los coches tienen garantía?</summary><p>La garantía depende de las condiciones de venta de cada coche. Pregúntanos por el que te interese y te lo explicamos.</p></details>
     <details><summary>¿Quién hace el cambio de nombre?</summary><p>Nuestra gestoría se encarga del trámite y te damos el permiso de circulación a tu nombre.</p></details>
   </div>
 </div></section>
@@ -267,7 +267,7 @@ ${star ? `<section class="g"><div class="in">
   };
   return layout({
     pageTitle: "Coches de segunda mano en Esparreguera | Multiservice Car",
-    description: `${cars.length} coches de ocasión revisados en Esparreguera (Barcelona), con 12 meses de garantía. Desde ${cfg.desde}.`,
+    description: `${cars.length} coches de ocasión en Esparreguera (Barcelona). Negocio familiar desde ${cfg.desde}.`,
     path: "/", body, jsonld, image: img0(heroCar) && { ...img0(heroCar), alt: carAlt(heroCar) },
   });
 }
@@ -296,7 +296,7 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
       </div>
       ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Equipamiento y estado</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
-      <div class="incl"><h2>Garantía</h2><ul><li>Revisión en taller</li><li>12 meses de garantía legal</li></ul></div>
+      <div class="incl"><h2>Garantía</h2><p>Según las condiciones de venta de este coche. Pregúntanos y te lo explicamos.</p></div>
     </div>
     <aside class="buy">
       <span class="eyebrow">${c.estado === "reservado" ? "Reservado" : "Precio"}</span>
@@ -310,7 +310,7 @@ export function carPage(c, cars) {
   <section class="similar" style="padding-block:40px 20px"><h2>También te pueden interesar</h2><div class="grid">${sim.map(card).join("")}</div></section>
 </div></div>`;
   const url = `${cfg.siteUrl}/coches/${c.id}/`;
-  const desc = `${title(c)} ${c.version}${c.year ? `, ${c.year}` : ""}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)}. Con 12 meses de garantía. En Esparreguera (Barcelona).`;
+  const desc = `${title(c)} ${c.version}${c.year ? `, ${c.year}` : ""}, ${kmf(c.km)}, ${c.combustible}, ${c.cambio}. ${eur(c.precio)}. En Esparreguera (Barcelona).`;
   const jsonld = {
     "@context": "https://schema.org",
     "@graph": [
