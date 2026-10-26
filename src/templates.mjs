@@ -108,11 +108,6 @@ ${ld(jsonld)}
 </head>
 <body>
 <a class="skip" href="#main">Saltar al contenido</a>
-<aside class="util g" aria-label="Ventajas"><div class="in">
-  <span><i class="dot"></i><b>Transferencia incluida</b>&nbsp;en todos los coches</span>
-  <span class="hide-s">Entrega en toda España · Representante oficial Aixam</span>
-  <span class="tel">Llámanos: <a href="tel:+34${cfg.telefono}"><b>${TEL}</b></a></span>
-</div></aside>
 <header class="top g"><div class="in">
   <a class="brand" href="/"><img src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
   <button class="menu-t" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
@@ -168,16 +163,6 @@ export function homePage(cars) {
 <div class="brands g"><div class="in"><span class="t">Marcas en stock:</span>
   ${brands.map(b => `<button type="button" data-brand="${esc(b)}" aria-pressed="false">${esc(b)}</button>`).join("")}
 </div></div>
-
-<section class="sec g perks-sec"><div class="in">
-  <h2 class="sr-only">Por qué comprar tu coche en ${esc(cfg.nombre)}</h2>
-  <div class="perks">
-    <div class="perk"><span class="ic">${I.wrench}</span><h3>Pasa por taller</h3><p>Revisamos mecánica, frenos y neumáticos antes de ponerlo a la venta.</p></div>
-    <div class="perk"><span class="ic">${I.doc}</span><h3>Papeles incluidos</h3><p>Transferencia, informe de la DGT y cambio de nombre corren de nuestra cuenta.</p></div>
-    <div class="perk"><span class="ic">${I.swap}</span><h3>Tu coche vale</h3><p>Te lo tasamos y lo descontamos del precio del que te lleves.</p></div>
-    <div class="perk"><span class="ic">${I.truck}</span><h3>Te lo llevamos</h3><p>Con nuestra grúa, a cualquier punto de la península.</p></div>
-  </div>
-</div></section>
 
 <section class="g" id="stock" style="padding-bottom:88px"><div class="in">
   <div class="sec-head"><div><p class="eyebrow">Stock actual</p><h2>Coches disponibles hoy</h2></div><p>Todos con transferencia incluida. Pulsa "Lo quiero ver" y te contestamos por WhatsApp.</p></div>
