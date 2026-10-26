@@ -1,4 +1,4 @@
-// Interacción de la web: filtros del stock, tasación por WhatsApp y galería.
+// Interacción de la web: filtros del stock y galería.
 (() => {
   const $ = id => document.getElementById(id);
   const WA = document.querySelector(".mbar .btn.w, header .btn.w")?.href.match(/wa\.me\/(\d+)/)?.[1];
@@ -53,13 +53,6 @@
       $("stock").scrollIntoView({ behavior: "smooth" });
     });
   }
-
-  // Tasación: abre WhatsApp con los datos escritos
-  $("tas")?.addEventListener("submit", e => {
-    e.preventDefault();
-    const msg = `Hola, quiero tasar mi coche: ${$("tm").value}, año ${$("ty").value}, ${$("tk").value} km. Mi teléfono: ${$("tt").value}. Ahora os mando fotos.`;
-    window.open(wa(msg), "_blank", "noopener");
-  });
 
   // Galería de la ficha: flechas, miniaturas, deslizar y pantalla completa
   const gal = document.querySelector(".gal[data-fotos]");
