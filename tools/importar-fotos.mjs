@@ -9,7 +9,7 @@ const col = k => head.indexOf(k);
 const UA = { "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/124 Safari/537.36" };
 
 for (const r of rows) {
-  const id = r[col("id")], url = r[r.length - 1];
+  const id = r[col("id")], url = r[r.length - 1]?.replace(/\/?$/, "/"); // WordPress da 404 sin la barra final en algunas fichas
   if (!url?.startsWith("http") || (process.env.SOLO && id !== process.env.SOLO)) continue;
   // La galería (NextGEN) solo pinta unas pocas fotos por página: recorremos también
   // sus páginas de imagen (/nggallery/image/…) y de paginación (/nggallery/page/N)
