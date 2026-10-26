@@ -25,7 +25,8 @@ Para publicar al momento sin esperar a la hora: en GitHub, pestaña Actions > "P
 
 - Datos del negocio (teléfonos, dirección, horario, tipo de financiación): `config.mjs`.
 - Enlace de la hoja: variable del repositorio `SHEET_CSV_URL` (Settings > Secrets and variables > Actions > Variables), con el enlace de Archivo > Compartir > Publicar en la web > CSV.
-- Hoja privada: si existe el secreto `GOOGLE_SA_KEY` (clave JSON de una cuenta de servicio de Google con la Google Sheets API activada), la hoja se lee con la API y no hace falta que sea pública. Solo hay que compartir la hoja con el email de la cuenta de servicio como Lector. Sin el secreto, se usa el CSV público.
+- Hoja privada (recomendado): pega `tools/hoja-privada.gs` en la hoja (Extensiones > Apps Script), cambia la clave e impleméntalo como aplicación web (ejecutar como tú, acceso: cualquier usuario). Guarda el enlace `.../exec?clave=TU_CLAVE` como secreto `SHEET_CSV_URL` (Settings > Secrets and variables > Actions > Secrets). Así la hoja puede estar en "Restringido".
+- Alternativa: secreto `GOOGLE_SA_KEY` con la clave JSON de una cuenta de servicio con la Google Sheets API activada y la hoja compartida con su email como Lector (algunas organizaciones de Google bloquean crear claves).
 - Por defecto se usa la hoja indicada en `config.mjs`. Para probar sin conexión: `SHEET_CSV_URL=data/coches.csv npm run dev`.
 
 ## SEO

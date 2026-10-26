@@ -112,7 +112,8 @@ async function loadCars() {
     if (res.status === 401 || res.status === 403) throw new Error("La hoja no es pública: en Google Sheets, Compartir > Cualquier persona con el enlace > Lector");
     if (!res.ok) throw new Error(`No se pudo leer la hoja (${res.status})`);
     text = await res.text();
-    if (/<html/i.test(text.slice(0, 500))) throw new Error("La hoja no es pública: compártela con \"cualquiera con el enlace\"");
+    if (/^ERROR/.test(text)) throw new Error(`El script de la hoja respondió: ${text.slice(0, 200)}`);
+    if (/<html/i.test(text.slice(0, 500))) throw new Error("La hoja no es pública: compártela con \"cualquiera con el enlace\", o revisa el enlace del script (secreto SHEET_CSV_URL)");
     console.log("Coches leídos de la Google Sheet");
   } else {
     const file = cfg.sheetCsvUrl || "data/coches.csv";
