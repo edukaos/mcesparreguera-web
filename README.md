@@ -23,7 +23,7 @@ Una fila por coche en la Google Sheet. Columnas:
 
 En Google Drive hay una carpeta madre (su enlace va en `carpetaFotos` de `config.mjs`), compartida con "cualquier persona con el enlace". Dentro, una subcarpeta por coche con el mismo nombre que su `id` de la hoja (`seat-leon-2018`; también vale "SEAT León 2018"). Salen todas las fotos de la subcarpeta ordenadas por nombre: la primera es la portada (ponerle `01` delante a la que se quiera). Los cambios en Drive salen en la web en menos de una hora.
 
-Para publicar al momento sin esperar a la hora: en la hoja, menú **Web > Publicar web ahora** (código en `tools/publicar-web.gs`, con un token fine-grained de GitHub con permiso Actions: lectura y escritura solo para este repositorio, guardado como propiedad del script `GITHUB_TOKEN`). También desde GitHub: pestaña Actions > "Publicar web" > Run workflow.
+Para publicar al momento sin esperar a la hora: en la hoja, menú **Web > Publicar web ahora** (código en `tools/publicar-web.gs`, con un token fine-grained de GitHub con permiso Actions: lectura y escritura solo para este repositorio, guardado como propiedad del script `GITHUB_TOKEN`). El mismo menú tiene **Web > Dar formato a la hoja** (colores, cabecera fija y desplegables en estado, destacado, combustible, cambio, carroceria y etiqueta; no toca los datos). También desde GitHub: pestaña Actions > "Publicar web" > Run workflow.
 
 ## Configuración
 
