@@ -170,34 +170,16 @@ nav.main a:hover{color:var(--ink)}
 .steps li span{color:#cfd8de}
 @media (max-width:860px){.steps ol{grid-template-columns:1fr}}
 
-/* Vender */
-.sell{display:grid;grid-template-columns:1fr 1fr;background:var(--surf);border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line)}
-.sell .ph{position:relative;min-height:360px}
-.sell .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.sell .ph .tag{position:absolute;left:20px;bottom:20px;right:20px;background:#2f3c45e6;color:#fff;border-radius:18px;padding:18px 20px;backdrop-filter:blur(6px)}
-.sell .ph .tag b{font:800 1.4rem var(--font-d);display:block}
-.sell form{padding:40px;display:flex;flex-direction:column;gap:16px}
-.sell h2{font-size:clamp(1.8rem,3.4vw,2.5rem);font-weight:800}
-.sell p{color:var(--muted)}
-.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fg .full{grid-column:1/-1}
-.field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.field label{font-size:13px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.field input{border:2px solid var(--line);border-radius:14px;padding:13px 14px;background:var(--page);width:100%}
-.field input:focus{border-color:var(--green);outline:none;background:var(--surf)}
-.ok{background:var(--mint);color:var(--deep);border-radius:14px;padding:14px 16px;font-weight:700}
-@media (max-width:900px){.sell{grid-template-columns:1fr}.sell .ph{min-height:240px}.sell form{padding:26px}}
-@media (max-width:480px){.fg{grid-template-columns:1fr}}
 
 /* Servicios */
-.svcs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .svc{border-radius:var(--r);padding:26px;background:var(--mint);display:flex;flex-direction:column;gap:12px;min-height:220px}
 .svc:nth-child(2){background:var(--acc-soft)}
 .svc .ic{width:52px;height:52px;border-radius:16px;background:var(--surf);display:grid;place-items:center;color:var(--deep)}
 .svc .ic svg{width:26px;height:26px}
 .svc h3{font-size:1.3rem;margin-top:auto}
 .svc p{color:var(--muted);font-size:15px}
-@media (max-width:980px){.svcs{grid-template-columns:1fr 1fr}}
+@media (max-width:980px){.svcs{grid-template-columns:1fr}}
 @media (max-width:520px){.svcs{grid-template-columns:1fr}}
 
 /* FAQ */
@@ -278,7 +260,8 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .incl li::before{content:"";flex:none;width:22px;height:22px;border-radius:50%;background:var(--deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/13px no-repeat;margin-top:2px}
 .buy{position:sticky;top:96px;background:var(--surf);border-radius:var(--r-lg);padding:28px;border:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
 .buy .price{font:800 3rem/1 var(--font-d);letter-spacing:-.03em}
-.buy .small{color:var(--muted);font-size:13.5px;text-align:center}
+.buy .small{color:var(--muted);font-size:14px;text-align:center;display:flex;gap:8px;justify-content:center;align-items:center}
+.buy .small svg{width:18px;height:18px;flex:none}
 .buy .seller{display:flex;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:16px}
 .buy .seller .mk{width:44px;height:44px;border-radius:14px;background:var(--deep);color:#fff;display:grid;place-items:center;font:800 15px var(--font-d);flex:none}
 .buy .seller b{display:block;font-weight:800}
