@@ -225,7 +225,7 @@ ${star ? `<section class="g"><div class="in">
   <div>
     <details open><summary>¿Puedo comprar sin ir a Esparreguera?</summary><p>Sí. Te enviamos fotos y vídeo del coche por WhatsApp y podemos firmar a distancia. Si necesitas que te lo llevemos a casa, te damos presupuesto del transporte: no está incluido en el precio.</p></details>
     <details><summary>¿Los coches tienen garantía?</summary><p>Sí, todos tienen la garantía legal de 12 meses de un coche de ocasión vendido por un profesional, y salen revisados de taller.</p></details>
-    <details><summary>¿Quién hace el cambio de nombre?</summary><p>Nuestra gestoría se encarga del trámite y te damos el permiso de circulación a tu nombre. Pregúntanos el coste.</p></details>
+    <details><summary>¿Quién hace el cambio de nombre?</summary><p>Nuestra gestoría se encarga del trámite y te damos el permiso de circulación a tu nombre.</p></details>
   </div>
 </div></section>
 
