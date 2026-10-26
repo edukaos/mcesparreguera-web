@@ -186,7 +186,7 @@ export function homePage(cars) {
   </div>
 </div></section>
 
-${star ? `<section class="g"><div class="in">
+${star ? `<section class="g" style="padding-bottom:88px"><div class="in">
   <div class="spot">
     <div class="ph">${imgTag(img0(star), carAlt(star))}</div>
     <div class="bd">
@@ -211,7 +211,7 @@ ${star ? `<section class="g"><div class="in">
   </div>
 </section>
 
-<section class="g" id="servicios" style="padding-bottom:88px"><div class="in">
+<section class="g" id="servicios" style="padding-block:88px"><div class="in">
   <div class="sec-head"><div><p class="eyebrow">Más que una compraventa</p><h2>Todo lo de tu coche, en un sitio</h2></div></div>
   <div class="svcs">
     <div class="svc"><span class="ic">${I.tag}</span><h3>Gestión de ventas</h3><p>Además de vender nuestros coches, gestionamos la venta del tuyo. <a href="${wa("Hola, quiero que me gestionéis la venta de mi coche")}" target="_blank" rel="noopener">Consúltanos por WhatsApp</a>.</p></div>
