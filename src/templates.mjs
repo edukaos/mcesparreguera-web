@@ -104,15 +104,17 @@ ${extraHead}
 <link rel="preload" href="/fonts/nunito-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/fonts/bricolage-grotesque-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/styles.css">
+<script>try{var t=localStorage.getItem("tema");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
 ${ld(jsonld)}
 </head>
 <body>
 <a class="skip" href="#main">Saltar al contenido</a>
 <header class="top g"><div class="in">
-  <a class="brand" href="/"><img src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
+  <a class="brand" href="/"><img class="lo-l" src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><img class="lo-d" src="/img/logo-272-oscuro.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
   <button class="menu-t" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <nav class="main" id="nav" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
   <a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">${I.wa}<span>Escríbenos</span></a>
+  <button class="theme-t" type="button" aria-label="Cambiar entre modo claro y oscuro" title="Modo claro / oscuro"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></button>
 </div></header>
 <main id="main">
 ${body}
@@ -246,7 +248,7 @@ ${star ? `<section class="g" style="padding-bottom:88px"><div class="in">
     <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs><pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0v32" fill="none" stroke="#ffffff10"/></pattern></defs>
       <rect width="600" height="400" fill="url(#grid)"/>
-      <path d="M0 250 70 205l30 18 38-55 26 32 34-74 28 50 30-66 34 58 28-40 36 50 30-72 34 64 30-34 42 56 36-46 30 30 50-30 44 22 60-38v222H0Z" fill="#3b4a54"/>
+      <path d="M0 250 70 205l30 18 38-55 26 32 34-74 28 50 30-66 34 58 28-40 36 50 30-72 34 64 30-34 42 56 36-46 30 30 50-30 44 22 60-38v222H0Z" style="fill:var(--mtn)"/>
       <path d="M-20 280C120 250 200 290 300 262s200-50 330-20" fill="none" stroke="#6fb1f2" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 14"/>
       <g transform="translate(300 250)"><circle r="34" fill="#6fb1f233"/><circle r="16" fill="#6fb1f2"/><circle r="6" fill="#fff"/></g>
       <text x="330" y="196" fill="#9cc6f0" font-family="Nunito Sans,sans-serif" font-size="14" font-weight="800" letter-spacing="2">MONTSERRAT</text>

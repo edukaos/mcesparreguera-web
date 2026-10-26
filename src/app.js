@@ -15,6 +15,16 @@
     document.addEventListener("click", e => { if (!head.contains(e.target)) set(false); });
   }
 
+  // Modo claro / oscuro: por defecto el del móvil u ordenador; el botón lo cambia y se recuerda
+  const tt = document.querySelector(".theme-t");
+  if (tt) tt.addEventListener("click", () => {
+    const root = document.documentElement;
+    const now = root.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const next = now === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    try { localStorage.setItem("tema", next); } catch (e) {}
+  });
+
   // Filtros del stock
   const grid = $("grid");
   if (grid && $("sort")) {
