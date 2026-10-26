@@ -36,7 +36,8 @@ jobs:
         uses: actions/configure-pages@v5
       - run: node build.mjs
         env:
-          SHEET_CSV_URL: ${{ vars.SHEET_CSV_URL }}
+          SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
+          GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
           SITE_URL: ${{ steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
