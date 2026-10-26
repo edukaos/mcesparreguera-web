@@ -214,6 +214,7 @@ ${star ? `<section class="g"><div class="in">
 <section class="g" id="servicios" style="padding-bottom:88px"><div class="in">
   <div class="sec-head"><div><p class="eyebrow">Más que una compraventa</p><h2>Todo lo de tu coche, en un sitio</h2></div></div>
   <div class="svcs">
+    <div class="svc"><span class="ic">${I.tag}</span><h3>Gestión de ventas</h3><p>Además de vender nuestros coches, gestionamos la venta del tuyo. <a href="${wa("Hola, quiero que me gestionéis la venta de mi coche")}" target="_blank" rel="noopener">Consúltanos por WhatsApp</a>.</p></div>
     <div class="svc"><span class="ic">${I.doc}</span><h3>Gestoría</h3><p>Transferencias, informes DGT, duplicados, matriculaciones y bajas.</p></div>
     <div class="svc"><span class="ic">${I.key}</span><h3>Coches sin carnet</h3><p>Representantes oficiales de Aixam. Desde los 15 años con licencia AM.</p></div>
     <div class="svc"><span class="ic">${I.cal}</span><h3>Alquiler de coches</h3><p>Por días o por semanas.</p></div>

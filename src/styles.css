@@ -172,14 +172,15 @@ nav.main a:hover{color:var(--ink)}
 
 
 /* Servicios */
-.svcs{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.svcs{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .svc{border-radius:var(--r);padding:26px;background:var(--mint);display:flex;flex-direction:column;gap:12px;min-height:220px}
 .svc:nth-child(2){background:var(--acc-soft)}
 .svc .ic{width:52px;height:52px;border-radius:16px;background:var(--surf);display:grid;place-items:center;color:var(--deep)}
 .svc .ic svg{width:26px;height:26px}
 .svc h3{font-size:1.3rem;margin-top:auto}
 .svc p{color:var(--muted);font-size:15px}
-@media (max-width:980px){.svcs{grid-template-columns:1fr}}
+.svc p a{color:var(--deep);font-weight:700}
+@media (max-width:980px){.svcs{grid-template-columns:1fr 1fr}}
 @media (max-width:520px){.svcs{grid-template-columns:1fr}}
 
 /* FAQ */
