@@ -154,8 +154,6 @@ nav.main a:hover{color:var(--ink)}
 .facts span{background:var(--page);border-radius:9px;padding:4px 10px;font-size:13.5px;font-weight:700;color:var(--green)}
 .card .pr{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-top:auto;padding-top:14px;border-top:1px dashed var(--line)}
 .card .pr b{font:800 1.85rem/1 var(--font-d);letter-spacing:-.02em}
-.card .pr span{color:var(--muted);font-size:14px;text-align:right;line-height:1.3}
-.card .pr span strong{color:var(--ink);font-size:16px}
 .card .act{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:relative;z-index:1}
 .empty{grid-column:1/-1;background:var(--surf);border:2px dashed var(--line);border-radius:var(--r);padding:40px;text-align:center;color:var(--muted)}
 
@@ -173,24 +171,6 @@ nav.main a:hover{color:var(--ink)}
 .spot .price{font:800 2.4rem/1 var(--font-d)}
 @media (max-width:900px){.spot{grid-template-columns:1fr}.spot .ph{min-height:280px}.spot .bd{padding:28px}}
 
-/* Financiación */
-.fin{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:center}
-.fin h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin:12px 0 16px}
-.fin .txt p{color:var(--muted);max-width:44ch}
-.fin ul{list-style:none;margin:22px 0 0;padding:0;display:grid;gap:10px}
-.fin li{display:flex;gap:10px;font-weight:600}
-.fin li::before{content:"";flex:none;width:24px;height:24px;border-radius:50%;background:var(--mint) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232f3c45' stroke-width='3'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/14px no-repeat}
-.calc{background:var(--deep);color:#fff;border-radius:var(--r-lg);padding:32px;display:flex;flex-direction:column;gap:20px;box-shadow:var(--shadow)}
-.calc label{font-size:13px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#b3c0c9;display:flex;justify-content:space-between;gap:10px}
-.calc label span{color:#fff;letter-spacing:0;text-transform:none;font-size:15px}
-.calc select{width:100%;background:#ffffff14;border:1px solid #ffffff2a;border-radius:14px;padding:13px 14px;color:#fff;font-weight:700}
-.calc select option{color:var(--ink)}
-.calc input[type=range]{width:100%;accent-color:var(--acc)}
-.calc .out{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;border-top:1px solid #ffffff22;padding-top:20px}
-.calc .out b{font:800 clamp(3rem,6vw,4.2rem)/.9 var(--font-d);letter-spacing:-.03em}
-.calc .out small{color:#b3c0c9;font-size:14px}
-.calc .fine{font-size:13px;color:#b3c0c9}
-@media (max-width:900px){.fin{grid-template-columns:1fr}}
 
 /* Pasos */
 .steps{background:var(--deep);color:#fff;position:relative;overflow:hidden}
@@ -313,8 +293,6 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .incl li::before{content:"";flex:none;width:22px;height:22px;border-radius:50%;background:var(--deep) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3'%3E%3Cpath d='m6 12 4 4 8-8'/%3E%3C/svg%3E") center/13px no-repeat;margin-top:2px}
 .buy{position:sticky;top:96px;background:var(--surf);border-radius:var(--r-lg);padding:28px;border:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:16px}
 .buy .price{font:800 3rem/1 var(--font-d);letter-spacing:-.03em}
-.buy .cuota{display:flex;justify-content:space-between;align-items:center;background:var(--page);border-radius:14px;padding:12px 14px;font-weight:700}
-.buy .cuota b{color:var(--acc-2);font:800 1.3rem var(--font-d)}
 .buy .small{color:var(--muted);font-size:13.5px;text-align:center}
 .buy .seller{display:flex;gap:12px;align-items:center;border-top:1px solid var(--line);padding-top:16px}
 .buy .seller .mk{width:44px;height:44px;border-radius:14px;background:var(--deep);color:#fff;display:grid;place-items:center;font:800 15px var(--font-d);flex:none}
