@@ -5,6 +5,16 @@
   const wa = t => `https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
   const eur = n => n.toLocaleString("es-ES", { maximumFractionDigits: 0, useGrouping: "always" }) + " €";
 
+  // Menú del móvil
+  const head = document.querySelector("header.top"), mt = head?.querySelector(".menu-t");
+  if (mt) {
+    const set = open => { head.classList.toggle("open", open); mt.setAttribute("aria-expanded", open); mt.setAttribute("aria-label", open ? "Cerrar menú" : "Abrir menú"); };
+    mt.addEventListener("click", () => set(!head.classList.contains("open")));
+    head.querySelectorAll("nav.main a").forEach(a => a.addEventListener("click", () => set(false)));
+    document.addEventListener("keydown", e => { if (e.key === "Escape") set(false); });
+    document.addEventListener("click", e => { if (!head.contains(e.target)) set(false); });
+  }
+
   // Filtros del stock
   const grid = $("grid");
   if (grid && $("sort")) {

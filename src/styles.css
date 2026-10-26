@@ -114,7 +114,7 @@ nav.main a:hover{color:var(--ink)}
 .brands{border-block:1px solid var(--line);background:var(--surf)}
 .brands .in{display:flex;align-items:center;gap:10px 34px;padding-block:22px;flex-wrap:wrap;justify-content:space-between}
 .brands span.t{font-weight:700;color:var(--muted);font-size:14px}
-.brands button{border:0;background:none;cursor:pointer;font:800 clamp(15px,1.6vw,19px) var(--font-d);letter-spacing:.02em;text-transform:uppercase;color:#6b7a72;transition:color .15s;padding:4px 0}
+.brands button{border:0;background:none;cursor:pointer;font:800 clamp(15px,1.6vw,19px) var(--font-d);letter-spacing:.02em;text-transform:uppercase;color:#5c6a72;transition:color .15s;padding:4px 0}
 .brands button:hover,.brands button[aria-pressed="true"]{color:var(--deep)}
 
 /* Ventajas */
@@ -196,7 +196,7 @@ nav.main a:hover{color:var(--ink)}
 .steps{background:var(--deep);color:#fff;position:relative;overflow:hidden}
 .steps .mtn{position:absolute;left:0;right:0;bottom:-2px;width:100%;height:auto;color:#3b4a54;pointer-events:none}
 .steps .in{position:relative}
-.steps h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin:12px 0 36px;max-width:16ch}
+.steps h2{font-size:clamp(2rem,4vw,3rem);font-weight:800;margin:12px 0 36px;max-width:24ch}
 .steps .eyebrow{color:#9cc6f0}
 .steps ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;counter-reset:s}
 .steps li{counter-increment:s;background:#ffffff10;border:1px solid #ffffff1c;border-radius:var(--r);padding:28px;backdrop-filter:blur(4px)}
@@ -354,3 +354,59 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .lightbox .gcount{left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px))}
 @media (max-width:600px){.gnav{width:40px;height:40px;font-size:26px}.gnav.prev{left:8px}.gnav.next{right:8px}}
 .thumbs{scrollbar-width:thin;overscroll-behavior-x:contain}
+
+/* ====== Revisión de usabilidad ====== */
+.skip{position:absolute;left:12px;top:-60px;z-index:100;background:var(--acc);color:#fff;padding:10px 16px;border-radius:12px;font-weight:800;text-decoration:none}
+.skip:focus{top:12px}
+.det .head,.det .desc{margin-top:28px}
+.menu-t{display:none;width:46px;height:46px;border-radius:13px;border:1px solid var(--line);background:var(--surf);cursor:pointer;place-items:center;flex:none;color:var(--ink)}
+.menu-t svg{width:22px;height:22px}
+@media (max-width:980px){
+  .menu-t{display:grid;order:3}
+  header.top .btn{margin-left:auto}
+  header.top.open nav.main{display:flex;flex-direction:column;gap:0;position:absolute;left:0;right:0;top:100%;background:var(--surf);border-bottom:1px solid var(--line);box-shadow:0 24px 32px -24px #1b252c55;padding:8px max(16px,env(safe-area-inset-left,0px)) 16px;margin:0;font-size:17px}
+  header.top.open nav.main a{padding:14px 4px;border-bottom:1px solid var(--line);color:var(--ink)}
+  header.top.open nav.main a:last-child{border-bottom:0}
+  /* Ficha en móvil y tablet: primero fotos, nombre y precio; después los datos */
+  .det{gap:0}
+  .det>div:first-child{display:contents}
+  .det .gal{order:1}.det .head{order:2}.det .buy{order:3;margin-top:24px}.det .specs6,.det .desc,.det .incl{order:4}
+}
+@media (max-width:760px){
+  /* Portada en móvil: los coches justo después de la cabecera, las ventajas detrás */
+  main{display:flex;flex-direction:column}
+  main>*{order:2}
+  main>.hero,main>.brands,main>#stock{order:1}
+  .perks-sec{padding-block:0 60px}
+  .brands .in{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:8px;padding-block:14px;scrollbar-width:none}
+  .brands .in::-webkit-scrollbar{display:none}
+  .brands span.t{white-space:nowrap;margin-right:4px}
+  .brands button{flex:none;white-space:nowrap;background:var(--page);border:1px solid var(--line);border-radius:999px;padding:10px 16px;font-size:14px;min-height:42px;color:var(--ink)}
+  .brands button[aria-pressed="true"]{background:var(--deep);color:#fff;border-color:var(--deep)}
+  .seg{flex-wrap:nowrap;overflow-x:auto;width:100%;scrollbar-width:none}
+  .seg::-webkit-scrollbar{display:none}
+  .seg button{min-height:42px;white-space:nowrap;flex:none}
+  .tools select{margin-left:0;flex:1;min-height:46px}
+  #stock{padding-top:48px}
+}
+@media (max-width:560px){
+  .util .tel{display:none}
+  .util .in{justify-content:center;padding-block:8px;font-size:13.5px}
+  .finder .f{padding:6px 12px}
+  .finder select{min-height:40px;font-size:17px}
+  .finder .btn{min-height:52px}
+  .hero .in{padding-bottom:48px}
+  .perks{grid-template-columns:1fr 1fr;gap:12px}
+  .perk{padding:18px;gap:10px}
+  .perk .ic{width:42px;height:42px;border-radius:13px}
+  .perk .ic svg{width:22px;height:22px}
+  .perk h3{font-size:1.08rem}
+  .perk p{font-size:14px;line-height:1.45}
+  .card .ph{aspect-ratio:16/10}
+  .card .bd{padding:16px 18px 18px}
+  .crumbs{padding-top:16px}
+  .det .head{margin-top:20px}
+  .buy{padding:22px}
+  .buy .price{font-size:2.6rem}
+  .thumbs button{width:72px}
+}

@@ -112,17 +112,19 @@ ${extraHead}
 ${ld(jsonld)}
 </head>
 <body>
-<div class="util g"><div class="in">
+<a class="skip" href="#main">Saltar al contenido</a>
+<aside class="util g" aria-label="Ventajas"><div class="in">
   <span><i class="dot"></i><b>Transferencia incluida</b>&nbsp;en todos los coches</span>
   <span class="hide-s">Entrega en toda España · Representante oficial Aixam</span>
-  <span>Llámanos: <a href="tel:+34${cfg.telefono}"><b>${TEL}</b></a></span>
-</div></div>
+  <span class="tel">Llámanos: <a href="tel:+34${cfg.telefono}"><b>${TEL}</b></a></span>
+</div></aside>
 <header class="top g"><div class="in">
   <a class="brand" href="/"><img src="/img/logo-272.png" alt="${esc(cfg.nombre)}" width="136" height="50"><small class="since">Esparreguera<br>desde ${cfg.desde}</small></a>
-  <nav class="main" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#vender">Vender mi coche</a><a href="/#financiacion">Financiación</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
+  <button class="menu-t" type="button" aria-expanded="false" aria-controls="nav" aria-label="Abrir menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <nav class="main" id="nav" aria-label="Principal"><a href="/#stock">Coches</a><a href="/#vender">Vender mi coche</a><a href="/#financiacion">Financiación</a><a href="/#servicios">Servicios</a><a href="/#contacto">Contacto</a></nav>
   <a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">${I.wa}<span>Escríbenos</span></a>
 </div></header>
-<main>
+<main id="main">
 ${body}
 </main>
 <footer class="g"><div class="in">
@@ -131,7 +133,7 @@ ${body}
   <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="/#contacto">${I.pin}Esparreguera, Barcelona</a></div>
   <div class="bottom">© ${new Date().getFullYear()} ${esc(cfg.nombre)} Esparreguera</div>
 </div></footer>
-<div class="mbar"><a class="btn o sm" href="tel:+34${cfg.telefono}">${I.phone}${TEL}</a><a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener">${I.wa}WhatsApp</a></div>
+<nav class="mbar" aria-label="Contacto rápido"><a class="btn o sm" href="tel:+34${cfg.telefono}">${I.phone}${TEL}</a><a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener">${I.wa}WhatsApp</a></nav>
 <script src="/app.js" defer></script>
 </body>
 </html>`;
@@ -172,7 +174,7 @@ export function homePage(cars) {
   ${brands.map(b => `<button type="button" data-brand="${esc(b)}" aria-pressed="false">${esc(b)}</button>`).join("")}
 </div></div>
 
-<section class="sec g"><div class="in">
+<section class="sec g perks-sec"><div class="in">
   <h2 class="sr-only">Por qué comprar tu coche en ${esc(cfg.nombre)}</h2>
   <div class="perks">
     <div class="perk"><span class="ic">${I.wrench}</span><h3>Pasa por taller</h3><p>Revisamos mecánica, frenos y neumáticos antes de ponerlo a la venta.</p></div>
@@ -251,10 +253,10 @@ ${star ? `<section class="g"><div class="in">
       <h2>¿Cuánto vale tu coche?</h2>
       <p>Rellena esto y mándanos 4 fotos por WhatsApp. Te decimos una cifra al día siguiente.</p>
       <div class="fg">
-        <div class="field full"><label for="tm">Marca y modelo</label><input id="tm" required placeholder="Ej. Seat Ibiza 1.0 TSI"></div>
-        <div class="field"><label for="ty">Año</label><input id="ty" inputmode="numeric" required placeholder="2017"></div>
+        <div class="field full"><label for="tm">Marca y modelo</label><input id="tm" required autocomplete="off" placeholder="Ej. Seat Ibiza 1.0 TSI"></div>
+        <div class="field"><label for="ty">Año</label><input id="ty" inputmode="numeric" required pattern="(19|20)[0-9]{2}" maxlength="4" title="Año con 4 cifras, por ejemplo 2017" placeholder="2017"></div>
         <div class="field"><label for="tk">Kilómetros</label><input id="tk" inputmode="numeric" required placeholder="95.000"></div>
-        <div class="field full"><label for="tt">Tu teléfono</label><input id="tt" inputmode="tel" required placeholder="6XX XXX XXX"></div>
+        <div class="field full"><label for="tt">Tu teléfono</label><input id="tt" type="tel" inputmode="tel" autocomplete="tel" required placeholder="6XX XXX XXX"></div>
       </div>
       <button class="btn g" type="submit">${I.wa}Enviar por WhatsApp</button>
     </form>
@@ -285,7 +287,7 @@ ${star ? `<section class="g"><div class="in">
   <div class="cbox">
     <p class="eyebrow">Ven a vernos</p><h2>Te esperamos en Esparreguera</h2>
     <dl>
-      <dt>WhatsApp</dt><dd>${WA_TXT}</dd>
+      <dt>WhatsApp</dt><dd><a href="${wa("Hola")}" target="_blank" rel="noopener">${WA_TXT}</a></dd>
       <dt>Teléfono</dt><dd><a href="tel:+34${cfg.telefono}">${TEL}</a></dd>
       <dt>Email</dt><dd><a href="mailto:${cfg.email}">${cfg.email}</a></dd>
       <dt>Dirección</dt><dd>${esc(cfg.direccion ? `${cfg.direccion}, ${cfg.ciudad}` : cfg.ciudad)}</dd>
@@ -338,7 +340,7 @@ export function carPage(c, cars) {
         <button class="gnav prev" type="button" aria-label="Foto anterior">‹</button><button class="gnav next" type="button" aria-label="Foto siguiente">›</button>
         <span class="gcount"><b id="gi">1</b> / ${c.fotos.length}</span>` : ""}${c.fotos[0] ? '<button class="gzoom" type="button" aria-label="Ver en pantalla completa">⤢</button>' : ""}</div>${thumbs}
         <p class="note">${c.fotos[0] ? "Más fotos y vídeo por WhatsApp, te los mandamos al momento." : "Pídenos las fotos por WhatsApp y te las mandamos al momento."}</p></div>
-      <div style="margin-top:28px"><p class="eyebrow">${esc(c.carroceria)} · ${c.year ?? ""}</p><h1 style="margin-top:10px">${esc(title(c))}</h1><p class="ver">${esc(c.version)}</p></div>
+      <div class="head"><p class="eyebrow">${esc(c.carroceria)} · ${c.year ?? ""}</p><h1 style="margin-top:10px">${esc(title(c))}</h1><p class="ver">${esc(c.version)}</p></div>
       <div class="specs6">
         <div><span class="ic">${I.cal}</span><span><small>Año</small><b>${c.year ?? "Consultar"}</b></span></div>
         <div><span class="ic">${I.road}</span><span><small>Kilómetros</small><b>${kmf(c.km)}</b></span></div>
@@ -347,7 +349,7 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.bolt}</span><span><small>Potencia</small><b>${c.cv ? `${c.cv} cv` : "Consultar"}</b></span></div>
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
       </div>
-      ${c.descripcion ? `<div style="margin-top:28px"><h2 style="font-size:1.5rem;margin-bottom:10px">Equipamiento y estado</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
+      ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Equipamiento y estado</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
       <div class="incl"><h2>Incluido en el precio</h2><ul><li>Transferencia y cambio de nombre</li><li>Informe de la DGT</li><li>Revisión en taller</li><li>12 meses de garantía legal</li></ul></div>
     </div>
     <aside class="buy">
