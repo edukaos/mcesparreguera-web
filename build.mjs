@@ -73,6 +73,8 @@ function normalize(r) {
     precio: num(r.precio),
     fotos: (r.fotos || "").split(/[\s|]+/).filter(Boolean).map(photoUrl),
     descripcion: r.descripcion || r["descripción"] || "",
+    equipamiento: r.equipamiento || "",
+    comentarios: r.comentarios || r.comentario || "",
     fichaAntigua: r.ficha_antigua || "",
   };
   car.sil = SIL_BY_BODY[car.carroceria.toLowerCase()] || "berlina";
@@ -124,6 +126,12 @@ async function loadCars() {
     console.log(`Usando el archivo local ${file}`);
   }
   const all = (rows ? toObjects(rows) : parseCsv(text)).filter(r => r.marca && r.modelo).map(normalize);
+  // Si la hoja no trae equipamiento o comentarios, usa los copiados de la web antigua (data/textos-antiguos.csv)
+  const antiguos = await readFile("data/textos-antiguos.csv", "utf8").then(parseCsv, () => []);
+  for (const c of all) {
+    const t = antiguos.find(a => a.id === c.id);
+    if (t) { c.equipamiento ||= t.equipamiento; c.comentarios ||= t.comentarios; }
+  }
   const cars = all.filter(c => c.estado !== "vendido" && c.precio);
   cars.sort((a, b) => (b.destacado - a.destacado) || (a.estado === "reservado") - (b.estado === "reservado"));
   return { cars, vendidos: all.filter(c => c.estado === "vendido") };
