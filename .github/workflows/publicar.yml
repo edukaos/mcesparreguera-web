@@ -55,7 +55,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
   # Sube la web al hosting propio (IONOS) por SFTP. Solo corre si existe la variable SFTP_CARPETA.
-  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA. Variables: SFTP_CARPETA (p. ej. /web-nueva) y DOMINIO.
+  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA. Variables: SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /) y DOMINIO.
   hosting:
     if: vars.SFTP_CARPETA != ''
     runs-on: ubuntu-latest
@@ -85,14 +85,23 @@ jobs:
           CONTRASENA: ${{ secrets.SFTP_CONTRASENA }}
           CARPETA: ${{ vars.SFTP_CARPETA }}
         run: |
-          # Nunca en la raíz ni encima del WordPress: la subida borra lo que no sea de la web nueva.
-          case "$CARPETA" in ""|"/"|"."|"./") echo "SFTP_CARPETA debe ser una carpeta propia, p. ej. /web-nueva"; exit 1;; esac
+          [ -n "$CARPETA" ] || { echo "Falta la variable SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /)"; exit 1; }
           export LFTP_PASSWORD="$CONTRASENA"
           conectar="set sftp:auto-confirm yes; set net:max-retries 3; set net:timeout 30; open --env-password -u $USUARIO sftp://$SERVIDOR"
           lftp -c "$conectar; mkdir -p -f $CARPETA; cd $CARPETA; cls -1a" > remoto.txt
-          if grep -qxE 'wp-config\.php|wp-content/?|wp-admin/?' remoto.txt; then
-            echo "En $CARPETA hay un WordPress: no subo nada para no borrarlo. Usa una carpeta nueva y vacía."; exit 1
+          # Si el WordPress sigue ahí, no se sube nada: primero hay que moverlo a la carpeta de copia.
+          if grep -qxE 'wp-config\.php|wp-content/?|wp-admin/?|index\.php' remoto.txt; then
+            echo "En $CARPETA sigue el WordPress (wp-config.php, wp-content, index.php...). Muévelo a /wordpress-backup y vuelve a publicar."; exit 1
           fi
-          # Fotos: solo las que cambian de tamaño (son muchas). Resto: todo lo nuevo. --delete quita lo que ya no existe.
-          lftp -c "$conectar; mirror -R --delete --ignore-time --parallel=4 --include '^fotos/' dist $CARPETA"
-          lftp -c "$conectar; mirror -R --delete --parallel=4 --exclude '^fotos/' dist $CARPETA"
+          # La copia del WordPress se queda en el hosting pero cerrada: nadie puede abrirla desde la web.
+          if grep -qx 'wordpress-backup/' remoto.txt; then
+            lftp -c "$conectar; cd $CARPETA/wordpress-backup; cls -1a" > backup.txt
+            printf 'Require all denied\n' > cerrar.htaccess
+            mover=""; grep -qx '.htaccess-original' backup.txt || ! grep -qx '.htaccess' backup.txt || mover="mv .htaccess .htaccess-original;"
+            lftp -c "$conectar; cd $CARPETA/wordpress-backup; $mover put cerrar.htaccess -o .htaccess"
+          fi
+          # Solo se borra dentro de coches/ y fotos/ (lo que genera la web). Lo demás de la carpeta,
+          # como la copia del WordPress, no se toca nunca. Fotos: solo las que cambian de tamaño (son muchas).
+          lftp -c "$conectar; mirror -R --delete --ignore-time --parallel=4 dist/fotos $CARPETA/fotos"
+          lftp -c "$conectar; mirror -R --delete --parallel=4 dist/coches $CARPETA/coches"
+          lftp -c "$conectar; mirror -R --parallel=4 --exclude '^fotos/' --exclude '^coches/' dist $CARPETA"
