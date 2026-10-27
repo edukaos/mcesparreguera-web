@@ -9,7 +9,7 @@ export default {
   whatsapp: "34624002094",
   email: "mcesparreguera@gmail.com",
   instagram: "mcesparreguera",
-  direccion: "", // TODO Edu: calle y número
+  direccion: "Carrer Enclusa, 169",
   horario: "",   // TODO Edu: p. ej. "L–V 9:00–13:30 · 16:00–19:30 · S 10:00–13:30"
   cp: "08292",   // código postal de Esparreguera
   // Horario para Google (datos estructurados): [días, abre, cierra]. Ej.: [["Monday","Tuesday","Wednesday","Thursday","Friday"], "09:00", "13:30"]
