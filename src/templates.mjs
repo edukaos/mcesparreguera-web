@@ -55,12 +55,14 @@ const abs = u => u && (u.startsWith("/") ? cfg.siteUrl + u : u);
 // JSON-LD seguro dentro de <script> (un "</script>" en una descripción no rompe la página)
 const ld = data => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`;
 const BIZ_ID = `${cfg.siteUrl}/#negocio`;
+const dirCompleta = [cfg.direccion, `${cfg.cp} ${cfg.ciudad}`].filter(Boolean).join(", ");
+const MAPS = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(cfg.direccion ? `${cfg.direccion}, ${cfg.cp} Esparreguera, Barcelona` : `${cfg.nombre} Esparreguera`)}`;
 const address = { "@type": "PostalAddress", streetAddress: cfg.direccion || undefined, addressLocality: "Esparreguera", addressRegion: "Barcelona", postalCode: cfg.cp || undefined, addressCountry: "ES" };
 const business = cars => ({
   "@type": "AutoDealer", "@id": BIZ_ID, name: `${cfg.nombre} Esparreguera`, alternateName: "MC Esparreguera",
   description: `Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, alquiler de coches y representante oficial de Aixam.`,
   url: `${cfg.siteUrl}/`, logo: `${cfg.siteUrl}/img/icon-512.png`, image: abs(cars.find(c => c.fotos[0])?.img?.[0]?.orig || cars.find(c => c.fotos[0])?.fotos[0]) || `${cfg.siteUrl}/img/logo.png`,
-  telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde), address,
+  telephone: `+34${cfg.telefono}`, email: cfg.email, foundingDate: String(cfg.desde), address, hasMap: MAPS,
   areaServed: [{ "@type": "City", name: "Esparreguera" }, { "@type": "AdministrativeArea", name: "Baix Llobregat" }, { "@type": "Country", name: "España" }],
   priceRange: cars.length ? `${eur(Math.min(...cars.map(c => c.precio)))} - ${eur(Math.max(...cars.map(c => c.precio)))}` : undefined,
   currenciesAccepted: "EUR", paymentAccepted: "Efectivo, transferencia",
@@ -122,7 +124,7 @@ ${body}
 <footer class="g"><div class="in">
   <div><b>${esc(cfg.nombre)}</b><p>Compraventa de coches de ocasión en Esparreguera desde ${cfg.desde}. Gestoría propia, alquiler de coches y representante oficial de Aixam.</p></div>
   <div><b>Coches</b><a href="/#stock">${I.car}Coches en venta</a><a href="/#servicios">${I.wrench}Servicios</a></div>
-  <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="/#contacto">${I.pin}Esparreguera, Barcelona</a></div>
+  <div><b>Contacto</b><a href="${wa("Hola")}" target="_blank" rel="noopener">${I.wa}WhatsApp ${WA_TXT}</a><a href="tel:+34${cfg.telefono}">${I.phone}Teléfono ${TEL}</a><a href="mailto:${cfg.email}">${I.mail}${cfg.email}</a><a href="https://www.instagram.com/${cfg.instagram}/" target="_blank" rel="noopener">${I.ig}@${cfg.instagram}</a><a href="${MAPS}" target="_blank" rel="noopener">${I.pin}${esc(cfg.direccion ? `${cfg.direccion}, Esparreguera` : "Esparreguera, Barcelona")}</a></div>
   <div class="bottom">© ${new Date().getFullYear()} ${esc(cfg.nombre)} Esparreguera</div>
 </div></footer>
 <nav class="mbar" aria-label="Contacto rápido"><a class="btn o sm" href="tel:+34${cfg.telefono}">${I.phone}${TEL}</a><a class="btn w sm" href="${wa("Hola, vengo de la web")}" target="_blank" rel="noopener">${I.wa}WhatsApp</a></nav>
@@ -239,10 +241,10 @@ ${star ? `<section class="g" style="padding-bottom:88px"><div class="in">
       <dt>WhatsApp</dt><dd><a href="${wa("Hola")}" target="_blank" rel="noopener">${WA_TXT}</a></dd>
       <dt>Teléfono</dt><dd><a href="tel:+34${cfg.telefono}">${TEL}</a></dd>
       <dt>Correo</dt><dd><a href="mailto:${cfg.email}">${cfg.email}</a></dd>
-      <dt>Dirección</dt><dd>${esc(cfg.direccion ? `${cfg.direccion}, ${cfg.ciudad}` : cfg.ciudad)}</dd>
+      <dt>Dirección</dt><dd><a href="${MAPS}" target="_blank" rel="noopener">${esc(dirCompleta)}</a></dd>
       <dt>Horario</dt><dd>${esc(cfg.horario || "Con cita previa")}</dd>
     </dl>
-    <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn a" href="${wa("Hola, quiero pedir cita para ver un coche")}" target="_blank" rel="noopener">Pedir cita</a><a class="btn o" href="https://www.google.com/maps/search/${encodeURIComponent(`${cfg.nombre} ${cfg.direccion} Esparreguera`)}" target="_blank" rel="noopener">${I.pin}Cómo llegar</a></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn a" href="${wa("Hola, quiero pedir cita para ver un coche")}" target="_blank" rel="noopener">Pedir cita</a><a class="btn o" href="${MAPS}" target="_blank" rel="noopener">${I.pin}Cómo llegar</a></div>
   </div>
   <div class="mapbox">
     <svg viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
