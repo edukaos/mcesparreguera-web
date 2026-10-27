@@ -39,7 +39,8 @@ jobs:
           SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
           GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          SITE_URL: ${{ steps.pages.outputs.base_url }}
+          # Con dominio propio (variable DOMINIO) la dirección oficial es esa; esta copia queda de prueba.
+          SITE_URL: ${{ vars.DOMINIO && format('https://{0}', vars.DOMINIO) || steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -52,3 +53,46 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Sube la web al hosting propio (IONOS) por SFTP. Solo corre si existe la variable SFTP_CARPETA.
+  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA. Variables: SFTP_CARPETA (p. ej. /web-nueva) y DOMINIO.
+  hosting:
+    if: vars.SFTP_CARPETA != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: img-${{ hashFiles('fotos/**') }}-${{ github.run_id }}-hosting
+          restore-keys: img-
+      - run: node build.mjs
+        env:
+          SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
+          GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
+          BASE_PATH: ""
+          SITE_URL: https://${{ vars.DOMINIO || 'mcesparreguera.com' }}
+      - run: sudo apt-get install -y -qq lftp >/dev/null
+      - name: Subir por SFTP
+        env:
+          SERVIDOR: ${{ secrets.SFTP_SERVIDOR }}
+          USUARIO: ${{ secrets.SFTP_USUARIO }}
+          CONTRASENA: ${{ secrets.SFTP_CONTRASENA }}
+          CARPETA: ${{ vars.SFTP_CARPETA }}
+        run: |
+          # Nunca en la raíz ni encima del WordPress: la subida borra lo que no sea de la web nueva.
+          case "$CARPETA" in ""|"/"|"."|"./") echo "SFTP_CARPETA debe ser una carpeta propia, p. ej. /web-nueva"; exit 1;; esac
+          export LFTP_PASSWORD="$CONTRASENA"
+          conectar="set sftp:auto-confirm yes; set net:max-retries 3; set net:timeout 30; open --env-password -u $USUARIO sftp://$SERVIDOR"
+          lftp -c "$conectar; mkdir -p -f $CARPETA; cd $CARPETA; cls -1a" > remoto.txt
+          if grep -qxE 'wp-config\.php|wp-content/?|wp-admin/?' remoto.txt; then
+            echo "En $CARPETA hay un WordPress: no subo nada para no borrarlo. Usa una carpeta nueva y vacía."; exit 1
+          fi
+          # Fotos: solo las que cambian de tamaño (son muchas). Resto: todo lo nuevo. --delete quita lo que ya no existe.
+          lftp -c "$conectar; mirror -R --delete --ignore-time --parallel=4 --include '^fotos/' dist $CARPETA"
+          lftp -c "$conectar; mirror -R --delete --parallel=4 --exclude '^fotos/' dist $CARPETA"

@@ -51,3 +51,12 @@ Cuando haya dirección y horario, rellenar `direccion`, `cp` y `horarioSchema` e
 npm install   # una vez
 npm run dev   # genera dist/ y la sirve en http://localhost:8080
 ```
+
+## Hosting propio (mcesparreguera.com en IONOS)
+
+El workflow "Publicar web" también sube la web por SFTP al hosting si existe la variable `SFTP_CARPETA`:
+
+- Secretos (Settings > Secrets and variables > Actions > Secrets): `SFTP_SERVIDOR`, `SFTP_USUARIO`, `SFTP_CONTRASENA`.
+- Variables: `SFTP_CARPETA` (carpeta nueva y vacía del hosting, p. ej. `/web-nueva`; nunca la del WordPress) y `DOMINIO` (`mcesparreguera.com`).
+- En IONOS, el dominio (y `www`) se apunta a esa carpeta. Volver atrás = apuntarlo otra vez a la carpeta del WordPress.
+- El build genera `.htaccess` con redirecciones 301 de la web antigua, https, sin www y página 404.

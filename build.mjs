@@ -311,4 +311,27 @@ ${urls.map(u => `<url><loc>${cfg.siteUrl}${u.path}</loc><lastmod>${today}</lastm
 </urlset>
 `);
 await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\n\nSitemap: ${cfg.siteUrl}/sitemap.xml\n`);
+// .htaccess para el hosting propio (Apache): redirecciones 301 de verdad, https, sin www, página 404 y caché.
+// GitHub Pages lo ignora; allí funcionan las páginas de redirección de arriba.
+const host = new URL(cfg.siteUrl).host.replace(/^www\./, "");
+const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+await writeFile(`${DIST}/.htaccess`, `ErrorDocument 404 /404.html
+Options -Indexes
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\\.${reEsc(host)}$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^${reEsc(host)}$ [NC]
+RewriteCond %{HTTPS} off [OR]
+RewriteCond %{HTTP_HOST} ^www\\. [NC]
+RewriteRule ^ https://${host}%{REQUEST_URI} [R=301,L,NE]
+${[...redirects].filter(([from]) => from !== "/").map(([from, to]) =>
+  `RewriteRule ^${reEsc(from.slice(1).replace(/\/$/, ""))}/?$ ${to} [R=301,L,NE]`).join("\n")}
+<IfModule mod_expires.c>
+ExpiresActive On
+ExpiresByType image/webp "access plus 1 month"
+ExpiresByType image/jpeg "access plus 1 month"
+ExpiresByType image/png "access plus 1 month"
+ExpiresByType font/woff2 "access plus 1 year"
+ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+`);
 console.log(`Web generada en ${DIST}/ con ${cars.length} coches y ${redirects.size} redirecciones`);
