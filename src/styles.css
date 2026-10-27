@@ -265,6 +265,11 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .specs6 .ic svg{width:21px;height:21px}
 .specs6 small{display:block;color:var(--muted);font-size:13px;font-weight:700}
 .specs6 b{font:700 16.5px var(--font-d)}
+.acc{margin-top:28px}
+.acc summary .n{color:var(--muted);font-weight:600;margin-right:auto}
+.equip{margin:0 0 18px;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;color:var(--muted)}
+.equip li{display:flex;gap:10px}
+.equip li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-top:.55em}
 .incl{margin-top:28px;background:var(--mint);border-radius:var(--r);padding:26px}
 .incl h2{font-size:1.35rem;margin-bottom:14px}
 .incl ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 20px}
@@ -280,7 +285,7 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .buy .seller span{color:var(--muted);font-size:14px}
 .similar h2{font-size:clamp(1.7rem,3vw,2.3rem);font-weight:800;margin-bottom:22px}
 @media (max-width:980px){.det{grid-template-columns:minmax(0,1fr)}.buy{position:static}}
-@media (max-width:560px){.specs6{grid-template-columns:1fr 1fr}.incl ul{grid-template-columns:1fr}}
+@media (max-width:560px){.specs6{grid-template-columns:1fr 1fr}.incl ul{grid-template-columns:1fr}.equip{grid-template-columns:1fr}}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 [hidden]{display:none!important}
@@ -328,7 +333,7 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
   /* Ficha en móvil y tablet: primero fotos, nombre y precio; después los datos */
   .det{gap:0}
   .det>div:first-child{display:contents}
-  .det .gal{order:1}.det .head{order:2}.det .buy{order:3;margin-top:24px}.det .specs6,.det .desc,.det .incl{order:4}
+  .det .gal{order:1}.det .head{order:2}.det .buy{order:3;margin-top:24px}.det .specs6,.det .desc,.det .acc{order:4}
 }
 @media (max-width:760px){
   /* Portada en móvil: los coches justo después de la cabecera, las ventajas detrás */

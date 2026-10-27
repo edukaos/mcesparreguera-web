@@ -277,6 +277,10 @@ ${star ? `<section class="g" style="padding-bottom:88px"><div class="in">
   });
 }
 
+// Equipamiento de la hoja: elementos separados por comas, punto y coma o saltos de línea (la coma entre cifras, como en "1,6", no corta)
+const items = t => t.split(/\s*(?:\n|;|·|,(?!\d))\s*/).map(x => x.replace(/\.$/, "").trim()).filter(Boolean)
+  .map(x => x[0].toUpperCase() + x.slice(1));
+
 export function carPage(c, cars) {
   const sim = cars.filter(x => x !== c).sort((a, b) => Math.abs(a.precio - c.precio) - Math.abs(b.precio - c.precio)).slice(0, 4);
   const dgtTxt = { C: "C (verde)", B: "B (amarilla)", ECO: "ECO", "0": "0 emisiones", H: "Histórico" }[c.etiqueta] || "Consultar";
@@ -300,8 +304,12 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.bolt}</span><span><small>Potencia</small><b>${c.cv ? `${c.cv} cv` : "Consultar"}</b></span></div>
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
       </div>
-      ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Equipamiento y estado</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
-      <div class="incl"><h2>Garantía</h2><p>Según las condiciones de venta de este coche. Pregúntanos y te lo explicamos.</p></div>
+      ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Sobre este coche</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
+      <div class="acc">
+        ${c.equipamiento ? `<details><summary>Equipamiento <span class="n">(${items(c.equipamiento).length})</span></summary><ul class="equip">${items(c.equipamiento).map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}
+        ${c.comentarios ? `<details><summary>Comentarios del vendedor</summary><p style="white-space:pre-line">${esc(c.comentarios)}</p></details>` : ""}
+        <details><summary>Garantía</summary><p>Según las condiciones de venta de este coche. Pregúntanos y te lo explicamos.</p></details>
+      </div>
     </div>
     <aside class="buy">
       <span class="eyebrow">${c.estado === "reservado" ? "Reservado" : "Precio"}</span>
