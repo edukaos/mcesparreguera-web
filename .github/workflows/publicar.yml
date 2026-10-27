@@ -39,7 +39,8 @@ jobs:
           SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
           GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          SITE_URL: ${{ steps.pages.outputs.base_url }}
+          # Con dominio propio (variable DOMINIO) la dirección oficial es esa; esta copia queda de prueba.
+          SITE_URL: ${{ vars.DOMINIO && format('https://{0}', vars.DOMINIO) || steps.pages.outputs.base_url }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
@@ -52,3 +53,55 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Sube la web al hosting propio (IONOS) por SFTP. Solo corre si existe la variable SFTP_CARPETA.
+  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA. Variables: SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /) y DOMINIO.
+  hosting:
+    if: vars.SFTP_CARPETA != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - uses: actions/cache@v4
+        with:
+          path: .cache
+          key: img-${{ hashFiles('fotos/**') }}-${{ github.run_id }}-hosting
+          restore-keys: img-
+      - run: node build.mjs
+        env:
+          SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
+          GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
+          BASE_PATH: ""
+          SITE_URL: https://${{ vars.DOMINIO || 'mcesparreguera.com' }}
+      - run: sudo apt-get install -y -qq lftp >/dev/null
+      - name: Subir por SFTP
+        env:
+          SERVIDOR: ${{ secrets.SFTP_SERVIDOR }}
+          USUARIO: ${{ secrets.SFTP_USUARIO }}
+          CONTRASENA: ${{ secrets.SFTP_CONTRASENA }}
+          CARPETA: ${{ vars.SFTP_CARPETA }}
+        run: |
+          [ -n "$CARPETA" ] || { echo "Falta la variable SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /)"; exit 1; }
+          export LFTP_PASSWORD="$CONTRASENA"
+          conectar="set sftp:auto-confirm yes; set net:max-retries 3; set net:timeout 30; open --env-password -u $USUARIO sftp://$SERVIDOR"
+          lftp -c "$conectar; mkdir -p -f $CARPETA; cd $CARPETA; cls -1a" > remoto.txt
+          # Si el WordPress sigue ahí, no se sube nada: primero hay que moverlo a la carpeta de copia.
+          if grep -qxE 'wp-config\.php|wp-content/?|wp-admin/?|index\.php' remoto.txt; then
+            echo "En $CARPETA sigue el WordPress (wp-config.php, wp-content, index.php...). Muévelo a /wordpress-backup y vuelve a publicar."; exit 1
+          fi
+          # La copia del WordPress se queda en el hosting pero cerrada: nadie puede abrirla desde la web.
+          if grep -qx 'wordpress-backup/' remoto.txt; then
+            lftp -c "$conectar; cd $CARPETA/wordpress-backup; cls -1a" > backup.txt
+            printf 'Require all denied\n' > cerrar.htaccess
+            mover=""; grep -qx '.htaccess-original' backup.txt || ! grep -qx '.htaccess' backup.txt || mover="mv .htaccess .htaccess-original;"
+            lftp -c "$conectar; cd $CARPETA/wordpress-backup; $mover put cerrar.htaccess -o .htaccess"
+          fi
+          # Solo se borra dentro de coches/ y fotos/ (lo que genera la web). Lo demás de la carpeta,
+          # como la copia del WordPress, no se toca nunca. Fotos: solo las que cambian de tamaño (son muchas).
+          lftp -c "$conectar; mirror -R --delete --ignore-time --parallel=4 dist/fotos $CARPETA/fotos"
+          lftp -c "$conectar; mirror -R --delete --parallel=4 dist/coches $CARPETA/coches"
+          lftp -c "$conectar; mirror -R --parallel=4 --exclude '^fotos/' --exclude '^coches/' dist $CARPETA"

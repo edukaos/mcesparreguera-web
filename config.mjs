@@ -15,7 +15,13 @@ export default {
   // Horario para Google (datos estructurados): [días, abre, cierra]. Ej.: [["Monday","Tuesday","Wednesday","Thursday","Friday"], "09:00", "13:30"]
   horarioSchema: [],
   // URLs de la web antigua que no salen de la columna ficha_antigua de la hoja → página nueva
-  redirecciones: { "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/" },
+  redirecciones: {
+    "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/",
+    // Páginas de la tienda y categorías del WordPress antiguo → stock
+    ...Object.fromEntries(["tienda", "carrito", "finalizar-compra", "mi-cuenta", "sample-page",
+      ...["camper", "dacia", "fiat", "mb", "opel", "renault", "seat", "toyota", "vw"].map(m => `category/${m}`)]
+      .map(p => [`/${p}/`, "/#stock"])),
+  },
   // Carpeta de Google Drive con una subcarpeta por coche, llamada como su id (p. ej. "seat-leon-2018").
   // Compartida con "cualquier persona con el enlace". Pega aquí su enlace.
   carpetaFotos: process.env.CARPETA_FOTOS || "https://drive.google.com/drive/folders/1uJcFjea_nC6h3ZuW4SfQ2kZXqyriYto5",
