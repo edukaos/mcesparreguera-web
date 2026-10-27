@@ -266,6 +266,7 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .specs6 small{display:block;color:var(--muted);font-size:13px;font-weight:700}
 .specs6 b{font:700 16.5px var(--font-d)}
 .acc{margin-top:28px}
+.acc summary .n{color:var(--muted);font-weight:600;margin-right:auto}
 .equip{margin:0 0 18px;padding:0;list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 24px;color:var(--muted)}
 .equip li{display:flex;gap:10px}
 .equip li::before{content:"";flex:none;width:7px;height:7px;border-radius:50%;background:var(--acc);margin-top:.55em}

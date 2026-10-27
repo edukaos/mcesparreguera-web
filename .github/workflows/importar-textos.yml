@@ -2,9 +2,6 @@ name: Importar textos de la web antigua
 
 on:
   workflow_dispatch:
-  push:
-    branches: [claude/project-thread-jf5cjk]
-    paths: [tools/importar-textos.mjs]
 
 permissions:
   contents: write

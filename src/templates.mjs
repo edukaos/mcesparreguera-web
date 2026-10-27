@@ -306,7 +306,7 @@ export function carPage(c, cars) {
       </div>
       ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Sobre este coche</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
       <div class="acc">
-        ${c.equipamiento ? `<details><summary>Equipamiento</summary><ul class="equip">${items(c.equipamiento).map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}
+        ${c.equipamiento ? `<details><summary>Equipamiento <span class="n">(${items(c.equipamiento).length})</span></summary><ul class="equip">${items(c.equipamiento).map(x => `<li>${esc(x)}</li>`).join("")}</ul></details>` : ""}
         ${c.comentarios ? `<details><summary>Comentarios del vendedor</summary><p style="white-space:pre-line">${esc(c.comentarios)}</p></details>` : ""}
         <details><summary>Garantía</summary><p>Según las condiciones de venta de este coche. Pregúntanos y te lo explicamos.</p></details>
       </div>

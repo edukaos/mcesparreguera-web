@@ -16,7 +16,9 @@ Una fila por coche en la Google Sheet. Columnas:
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
 | fotos | vacío, enlace de una carpeta de Drive, o enlaces separados por espacios | Normalmente vacío: las fotos salen de la carpeta de Drive del coche (ver abajo). Si se pone el enlace de una carpeta, de cada foto o URLs de imágenes, se usan esos. Si no hay nada en Drive, se usan las fotos de `fotos/<id>/` del repositorio. |
-| descripcion | texto libre | Equipamiento y estado. Sale en la ficha y en Google: no poner notas internas. |
+| descripcion | texto libre | Resumen del coche, siempre visible en la ficha y en Google: no poner notas internas. |
+| equipamiento | elementos separados por comas | Sale en la ficha como lista desplegable «Equipamiento». Vacío = el de la web antigua (`data/textos-antiguos.csv`). |
+| comentarios | texto libre | Desplegable «Comentarios del vendedor». Vacío = el de la web antigua. |
 | ficha_antigua | URL de la web antigua | Esa dirección redirige a la ficha nueva para no perder lo que Google ya tenía. |
 
 ## Fotos
