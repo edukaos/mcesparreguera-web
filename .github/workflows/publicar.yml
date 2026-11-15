@@ -107,8 +107,20 @@ jobs:
           USUARIO: ${{ secrets.SFTP_USUARIO }}
           CONTRASENA: ${{ secrets.SFTP_CONTRASENA }}
           CARPETA: ${{ matrix.carpeta }}
+          MARCA: ${{ matrix.marca }}
+          CARPETA_MC: ${{ vars.SFTP_CARPETA }}
+          CARPETA_MARTO: ${{ vars.SFTP_CARPETA_MARTO }}
         run: |
           [ -n "$CARPETA" ] || { echo "Falta la variable SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /)"; exit 1; }
+          # Las dos webs comparten usuario SFTP: martocoches.com está en la raíz y mcesparreguera.com en una subcarpeta.
+          # Si las carpetas coinciden o la de mcesparreguera.com es la raíz, una web pisaría a la otra: se para sin subir nada.
+          norm() { echo "$1" | sed 's#^/*##; s#/*$##'; }
+          if [ "$MARCA" = mc ] && [ -z "$(norm "$CARPETA")" ]; then
+            echo "SFTP_CARPETA es la raíz, que es de martocoches.com. Pon la subcarpeta de mcesparreguera.com (p. ej. clickandbuilds/mcesparreguera)."; exit 1
+          fi
+          if [ -n "$CARPETA_MARTO" ] && [ -n "$CARPETA_MC" ] && [ "$(norm "$CARPETA_MARTO")" = "$(norm "$CARPETA_MC")" ]; then
+            echo "SFTP_CARPETA y SFTP_CARPETA_MARTO son la misma carpeta; cada dominio necesita la suya."; exit 1
+          fi
           export LFTP_PASSWORD="$CONTRASENA"
           conectar="set sftp:auto-confirm yes; set net:max-retries 3; set net:timeout 30; open --env-password -u $USUARIO sftp://$SERVIDOR"
           lftp -c "$conectar; mkdir -p -f $CARPETA; cd $CARPETA; cls -1a" > remoto.txt
