@@ -1,8 +1,36 @@
 // Datos del negocio. Cambia aquí teléfono, dirección u horario.
+// La misma web se genera con dos marcas (variable MARCA): "mc" → mcesparreguera.com y "marto" → martocoches.com.
+// Comparten hoja, fotos, teléfono y dirección; solo cambian el nombre, el logo y el dominio.
+const MARCAS = {
+  mc: {
+    dominio: "mcesparreguera.com",
+    nombre: "Multiservice Car",
+    siglas: "MC",
+    alias: "MC Esparreguera",
+    logo: "/img/logo-272.png", logoOscuro: "/img/logo-272-oscuro.png", logoAncho: 136, logoAlto: 50, claseLogo: "",
+    iconos: "",          // carpeta de src/img con favicon e iconos propios ("" = los de siempre)
+  },
+  marto: {
+    dominio: "martocoches.com",
+    nombre: "Marto Coches",
+    siglas: "MT",
+    alias: "Marto Coches Esparreguera",
+    logo: "/img/marto/logo.png", logoOscuro: "/img/marto/logo-oscuro.png", logoAncho: 92, logoAlto: 66, claseLogo: "alto",
+    iconos: "marto",
+    // Para Google la web principal es mcesparreguera.com: martocoches.com se ve entera pero no compite con ella.
+    principal: "https://mcesparreguera.com",
+  },
+};
+const marca = MARCAS[process.env.MARCA || "mc"];
+if (!marca) throw new Error(`MARCA desconocida: ${process.env.MARCA} (usa ${Object.keys(MARCAS).join(" o ")})`);
+const siteUrl = (process.env.SITE_URL || `https://${marca.dominio}`).replace(/\/$/, "");
+
 export default {
+  ...marca,
   // URL pública de la web, sin barra final. En GitHub Actions llega sola (SITE_URL); al pasar al dominio propio no hay que tocar nada.
-  siteUrl: (process.env.SITE_URL || "https://mcesparreguera.com").replace(/\/$/, ""),
-  nombre: "Multiservice Car",
+  siteUrl,
+  // Dirección que se indica a Google como la oficial (canonical). Normalmente la propia web.
+  principal: (marca.principal || siteUrl).replace(/\/$/, ""),
   ciudad: "Esparreguera (Barcelona)",
   desde: 2008,
   telefono: "624002094",
@@ -15,7 +43,13 @@ export default {
   // Horario para Google (datos estructurados): [días, abre, cierra]. Ej.: [["Monday","Tuesday","Wednesday","Thursday","Friday"], "09:00", "13:30"]
   horarioSchema: [],
   // URLs de la web antigua que no salen de la columna ficha_antigua de la hoja → página nueva
-  redirecciones: { "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/" },
+  redirecciones: {
+    "/volkwagen-polo-1-6-tdi-advance-95cv/": "/coches/volkswagen-polo-2020/",
+    // Páginas de la tienda y categorías del WordPress antiguo → stock
+    ...Object.fromEntries(["tienda", "carrito", "finalizar-compra", "mi-cuenta", "sample-page",
+      ...["camper", "dacia", "fiat", "mb", "opel", "renault", "seat", "toyota", "vw"].map(m => `category/${m}`)]
+      .map(p => [`/${p}/`, "/#stock"])),
+  },
   // Carpeta de Google Drive con una subcarpeta por coche, llamada como su id (p. ej. "seat-leon-2018").
   // Compartida con "cualquier persona con el enlace". Pega aquí su enlace.
   carpetaFotos: process.env.CARPETA_FOTOS || "https://drive.google.com/drive/folders/1uJcFjea_nC6h3ZuW4SfQ2kZXqyriYto5",
