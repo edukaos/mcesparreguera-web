@@ -5,7 +5,7 @@ import { createHash, createSign } from "node:crypto";
 import cfg from "./config.mjs";
 import { homePage, carPage, redirectPage, notFoundPage } from "./src/templates.mjs";
 
-const DIST = "dist";
+const DIST = process.env.DIST || "dist";
 // Ruta base cuando la web vive en una subcarpeta (p. ej. GitHub Pages sin dominio propio: /mcesparreguera-web).
 const BASE = (process.env.BASE_PATH || "").replace(/\/$/, "");
 const withBase = html => html.replace(/(href|src|srcset|data-src)="\/(?!\/)/g, `$1="${BASE}/`).replace(/&quot;\/(?!\/)/g, `&quot;${BASE}/`)
@@ -292,25 +292,28 @@ for (const [from, to] of redirects) if (from !== "/") await page(from, redirectP
 await copyFile("src/app.js", `${DIST}/app.js`);
 await cp("src/img", `${DIST}/img`, { recursive: true });
 await cp("src/fonts", `${DIST}/fonts`, { recursive: true });
-await copyFile("src/favicon.ico", `${DIST}/favicon.ico`);
+const ICO = cfg.iconos ? `${cfg.iconos}/` : "";
+await copyFile(`src/${cfg.iconos ? `img/${cfg.iconos}/` : ""}favicon.ico`, `${DIST}/favicon.ico`);
 await writeFile(`${DIST}/site.webmanifest`, JSON.stringify({
   name: `${cfg.nombre} Esparreguera`, short_name: cfg.nombre, lang: "es", start_url: "./", scope: "./", display: "standalone",
   background_color: "#f3f5f7", theme_color: "#2f3c45",
   icons: [
-    { src: "img/icon-192.png", sizes: "192x192", type: "image/png" },
-    { src: "img/icon-512.png", sizes: "512x512", type: "image/png" },
-    { src: "img/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+    { src: `img/${ICO}icon-192.png`, sizes: "192x192", type: "image/png" },
+    { src: `img/${ICO}icon-512.png`, sizes: "512x512", type: "image/png" },
+    { src: `img/${ICO}icon-maskable-512.png`, sizes: "512x512", type: "image/png", purpose: "maskable" },
   ],
 }, null, 1));
 
 const today = new Date().toISOString().slice(0, 10);
 const urls = [{ path: "/", imgs: [] }, ...cars.map(c => ({ path: `/coches/${c.id}/`, imgs: c.img.map(i => i.orig || i.src) }))];
-await writeFile(`${DIST}/sitemap.xml`, `<?xml version="1.0" encoding="UTF-8"?>
+// Si la web apunta a otra como principal (martocoches.com → mcesparreguera.com), el mapa del sitio solo va en la principal.
+const esPrincipal = cfg.principal === cfg.siteUrl;
+if (esPrincipal) await writeFile(`${DIST}/sitemap.xml`, `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${urls.map(u => `<url><loc>${cfg.siteUrl}${u.path}</loc><lastmod>${today}</lastmod>${u.imgs.map(i => `<image:image><image:loc>${xmlEsc(i.startsWith("/") ? cfg.siteUrl + i : i)}</image:loc></image:image>`).join("")}</url>`).join("\n")}
 </urlset>
 `);
-await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\n\nSitemap: ${cfg.siteUrl}/sitemap.xml\n`);
+await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\n${esPrincipal ? `\nSitemap: ${cfg.siteUrl}/sitemap.xml\n` : ""}`);
 // .htaccess para el hosting propio (Apache): redirecciones 301 de verdad, https, sin www, página 404 y caché.
 // GitHub Pages lo ignora; allí funcionan las páginas de redirección de arriba.
 const host = new URL(cfg.siteUrl).host.replace(/^www\./, "");
@@ -334,4 +337,4 @@ ExpiresByType font/woff2 "access plus 1 year"
 ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
 `);
-console.log(`Web generada en ${DIST}/ con ${cars.length} coches y ${redirects.size} redirecciones`);
+console.log(`Web de ${cfg.nombre} (${cfg.siteUrl}) generada en ${DIST}/ con ${cars.length} coches y ${redirects.size} redirecciones`);

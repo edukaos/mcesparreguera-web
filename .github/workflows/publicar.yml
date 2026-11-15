@@ -54,36 +54,59 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 
-  # Sube la web al hosting propio (IONOS) por SFTP. Solo corre si existe la variable SFTP_CARPETA.
-  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA. Variables: SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /) y DOMINIO.
+  # Sube la web al hosting propio (IONOS) por SFTP: una vez por dominio, desde la misma hoja y las mismas fotos.
+  # Secretos: SFTP_SERVIDOR, SFTP_USUARIO, SFTP_CONTRASENA (los mismos para los dos dominios).
+  # Variables: SFTP_CARPETA y DOMINIO para mcesparreguera.com; SFTP_CARPETA_MARTO para martocoches.com.
+  # Cada dominio solo se sube si su variable de carpeta existe.
   hosting:
-    if: vars.SFTP_CARPETA != ''
+    if: vars.SFTP_CARPETA != '' || vars.SFTP_CARPETA_MARTO != ''
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false   # si falla un dominio, el otro se sube igual
+      matrix:
+        include:
+          - marca: mc
+            carpeta: ${{ vars.SFTP_CARPETA }}
+            dominio: ${{ vars.DOMINIO || 'mcesparreguera.com' }}
+          - marca: marto
+            carpeta: ${{ vars.SFTP_CARPETA_MARTO }}
+            dominio: martocoches.com
+    name: hosting (${{ matrix.dominio }})
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - if: matrix.carpeta == ''
+        run: echo "Sin variable de carpeta para ${{ matrix.dominio }}; no se sube."
+      - if: matrix.carpeta != ''
+        uses: actions/checkout@v4
+      - if: matrix.carpeta != ''
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm ci --no-audit --no-fund
-      - uses: actions/cache@v4
+      - if: matrix.carpeta != ''
+        run: npm ci --no-audit --no-fund
+      - if: matrix.carpeta != ''
+        uses: actions/cache@v4
         with:
           path: .cache
-          key: img-${{ hashFiles('fotos/**') }}-${{ github.run_id }}-hosting
+          key: img-${{ hashFiles('fotos/**') }}-${{ github.run_id }}-hosting-${{ matrix.marca }}
           restore-keys: img-
-      - run: node build.mjs
+      - if: matrix.carpeta != ''
+        run: node build.mjs
         env:
           SHEET_CSV_URL: ${{ secrets.SHEET_CSV_URL || vars.SHEET_CSV_URL }}
           GOOGLE_SA_KEY: ${{ secrets.GOOGLE_SA_KEY }}
           BASE_PATH: ""
-          SITE_URL: https://${{ vars.DOMINIO || 'mcesparreguera.com' }}
-      - run: sudo apt-get install -y -qq lftp >/dev/null
+          MARCA: ${{ matrix.marca }}
+          SITE_URL: https://${{ matrix.dominio }}
+      - if: matrix.carpeta != ''
+        run: sudo apt-get install -y -qq lftp >/dev/null
       - name: Subir por SFTP
+        if: matrix.carpeta != ''
         env:
           SERVIDOR: ${{ secrets.SFTP_SERVIDOR }}
           USUARIO: ${{ secrets.SFTP_USUARIO }}
           CONTRASENA: ${{ secrets.SFTP_CONTRASENA }}
-          CARPETA: ${{ vars.SFTP_CARPETA }}
+          CARPETA: ${{ matrix.carpeta }}
         run: |
           [ -n "$CARPETA" ] || { echo "Falta la variable SFTP_CARPETA (carpeta a la que apunta el dominio, p. ej. /)"; exit 1; }
           export LFTP_PASSWORD="$CONTRASENA"

@@ -290,6 +290,9 @@ footer .bottom{grid-column:1/-1;border-top:1px solid #ffffff1c;padding-top:20px;
 .brand img{height:60px;width:auto}
 .brand .since{border-left:1px solid var(--line);padding-left:12px;line-height:1.25;font-weight:700}
 @media (max-width:520px){.brand .since{display:none}.brand img{height:42px}}
+/* Logo apilado (dibujo encima del nombre), como el de Marto Coches: necesita más altura para leerse */
+.brand.alto img{height:74px}
+@media (max-width:520px){.brand.alto img{height:54px}}
 /* Galería con varias fotos */
 .thumbs{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:4px}
 .thumbs button{flex:none;width:84px;aspect-ratio:4/3;border:3px solid transparent;border-radius:12px;padding:0;overflow:hidden;cursor:pointer;background:var(--mint)}

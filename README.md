@@ -60,3 +60,14 @@ El workflow "Publicar web" también sube la web por SFTP al hosting si existe la
 - Variables: `SFTP_CARPETA` (la carpeta a la que apunta el dominio en IONOS, p. ej. `/`) y `DOMINIO` (`mcesparreguera.com`).
 - Antes, el WordPress se mueve a `wordpress-backup/` dentro de esa carpeta: si sigue ahí (wp-config.php, index.php...) la subida se para. La subida solo borra dentro de `coches/` y `fotos/`, así que la copia no se toca, y la subida le pone un `.htaccess` que impide abrirla desde la web (el suyo queda como `.htaccess-original`).
 - El build genera `.htaccess` con redirecciones 301 de la web antigua, https, sin www y página 404.
+
+## Dos dominios: mcesparreguera.com y martocoches.com
+
+La misma web se genera dos veces en cada publicación, desde la misma hoja y las mismas fotos de Drive:
+
+- `MARCA=mc` → mcesparreguera.com (Multiservice Car). Variables `SFTP_CARPETA` y `DOMINIO`.
+- `MARCA=marto` → martocoches.com (Marto Coches, su logo en `src/img/marto/`). Variable `SFTP_CARPETA_MARTO`.
+
+Solo cambian el nombre, el logo, los iconos y el dominio (ver `MARCAS` en `config.mjs`). martocoches.com indica a Google
+que la principal es mcesparreguera.com (canonical) y no publica mapa del sitio, para que no compitan entre ellas.
+Probar en local: `MARCA=marto DIST=dist-marto SHEET_CSV_URL=data/coches.csv node build.mjs`.
