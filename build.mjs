@@ -321,6 +321,28 @@ if (esPrincipal) await writeFile(`${DIST}/sitemap.xml`, `<?xml version="1.0" enc
 ${urls.map(u => `<url><loc>${cfg.siteUrl}${u.path}</loc><lastmod>${today}</lastmod>${u.imgs.map(i => `<image:image><image:loc>${xmlEsc(i.startsWith("/") ? cfg.siteUrl + i : i)}</image:loc></image:image>`).join("")}</url>`).join("\n")}
 </urlset>
 `);
+// Catálogo para Meta (Commerce Manager → WhatsApp Business): un CSV en una URL fija que Meta descarga cada día.
+// Solo coches a la venta con foto; los vendidos no salen, así Meta los quita del catálogo. Reservados: "agotado".
+if (esPrincipal) {
+  const csvCell = v => /[",\n\r]/.test(v = String(v ?? "")) ? `"${v.replace(/"/g, '""')}"` : v;
+  const fmtNum = n => n.toLocaleString("es-ES", { useGrouping: "always" });
+  const absUrl = u => u.startsWith("/") ? cfg.siteUrl + u : u;
+  const head = ["id", "title", "description", "availability", "condition", "price", "link", "image_link", "additional_image_link", "brand", "google_product_category"];
+  const rows = cars.filter(c => c.img?.length).map(c => {
+    const fotos = c.img.map(i => absUrl(i.orig || i.src));
+    const datos = [c.year, c.km != null && `${fmtNum(c.km)} km`, c.combustible, c.cambio, c.cv && `${c.cv} CV`, c.etiqueta && `etiqueta ${c.etiqueta}`].filter(Boolean).join(" · ");
+    const description = [`${c.marca} ${c.modelo} ${c.version}`.trim() + ".", datos + ".", c.descripcion,
+      "Garantía según condiciones de venta. Nos encargamos del cambio de nombre.",
+      `Ven a verlo a ${cfg.direccion}, Esparreguera, o escríbenos por WhatsApp al ${cfg.telefono.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}.`]
+      .filter(Boolean).join(" ").slice(0, 5000);
+    return [c.id, `${c.marca} ${c.modelo} ${c.version}${c.year ? ` (${c.year})` : ""}`.slice(0, 150), description,
+      c.estado === "reservado" ? "out of stock" : "in stock", "used", `${c.precio.toFixed(2)} EUR`,
+      `${cfg.principal}/coches/${c.id}/`, fotos[0], fotos.slice(1, 11).join(","), c.marca,
+      "Vehicles & Parts > Vehicles > Motor Vehicles > Cars, Trucks & Vans"];
+  });
+  await writeFile(`${DIST}/catalogo-meta.csv`, [head, ...rows].map(r => r.map(csvCell).join(",")).join("\n") + "\n");
+  console.log(`Catálogo para Meta: ${rows.length} coches en catalogo-meta.csv`);
+}
 await writeFile(`${DIST}/robots.txt`, `User-agent: *\nAllow: /\n${esPrincipal ? `\nSitemap: ${cfg.siteUrl}/sitemap.xml\n` : ""}`);
 // .htaccess para el hosting propio (Apache): redirecciones 301 de verdad, https, sin www, página 404 y caché.
 // GitHub Pages lo ignora; allí funcionan las páginas de redirección de arriba.
