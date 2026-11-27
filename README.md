@@ -10,7 +10,7 @@ Una fila por coche en la Google Sheet. Los coches nuevos se añaden abajo: la we
 | --- | --- | --- |
 | id | `seat-leon-2018` | Opcional. Si se deja vacío se crea con marca, modelo y año. No cambiarlo una vez publicado: es la dirección de la ficha. |
 | estado | disponible / reservado / vendido | Los vendidos desaparecen de la web y su dirección lleva al stock (mejor dejar la fila como "vendido" que borrarla). |
-| destacado | sí / no | Ya no se usa: el orden y el «Recién llegado» de la portada salen de la posición en la hoja. |
+| destacado | sí / no | Salen en el slider de fotos de arriba de la portada (solo los que tienen foto). Sin ninguno, sale una foto fija. No cambian el orden del stock. |
 | marca, modelo, version | SEAT, León, 1.2 TSI Style 110 cv | |
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |

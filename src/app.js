@@ -25,6 +25,33 @@
     try { localStorage.setItem("tema", next); } catch (e) {}
   });
 
+  // Slider de destacados en la portada: pasa solo cada 5 s, se para al tocarlo o pasar el ratón
+  const hs = document.querySelector("[data-slider]");
+  const track = hs?.querySelector(".hs-track");
+  if (track && track.children.length > 1) {
+    const slides = [...track.children], dots = [...hs.querySelectorAll(".hs-dots button")];
+    const cur = () => Math.round(track.scrollLeft / track.clientWidth);
+    const go = i => track.scrollTo({ left: ((i + slides.length) % slides.length) * track.clientWidth });
+    let timer, paused = false;
+    const play = () => { clearInterval(timer); if (!paused && !matchMedia("(prefers-reduced-motion: reduce)").matches) timer = setInterval(() => go(cur() + 1), 5000); };
+    track.addEventListener("scroll", () => {
+      const i = cur();
+      dots.forEach((d, j) => d.setAttribute("aria-current", i === j));
+      slides.forEach((s, j) => { s.toggleAttribute("aria-hidden", i !== j); s.tabIndex = i === j ? 0 : -1; });
+    }, { passive: true });
+    hs.querySelector(".prev").addEventListener("click", () => { go(cur() - 1); play(); });
+    hs.querySelector(".next").addEventListener("click", () => { go(cur() + 1); play(); });
+    dots.forEach(d => d.addEventListener("click", () => { go(+d.dataset.i); play(); }));
+    track.addEventListener("keydown", e => { if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); go(cur() + (e.key === "ArrowRight" ? 1 : -1)); } });
+    hs.addEventListener("mouseenter", () => { paused = true; play(); });
+    hs.addEventListener("mouseleave", () => { paused = false; play(); });
+    hs.addEventListener("focusin", () => { paused = true; play(); });
+    hs.addEventListener("focusout", () => { paused = false; play(); });
+    track.addEventListener("touchstart", () => { paused = true; play(); }, { passive: true });
+    document.addEventListener("visibilitychange", () => document.hidden ? clearInterval(timer) : play());
+    play();
+  }
+
   // Filtros del stock
   const grid = $("grid");
   if (grid && $("sort")) {
