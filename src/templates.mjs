@@ -136,8 +136,11 @@ ${body}
 
 export function homePage(cars) {
   const withPhoto = cars.filter(c => c.fotos[0]);
-  const heroCar = cars.find(c => c.id === cfg.portada) || withPhoto.find(c => /camper/i.test(c.carroceria)) || withPhoto[0] || cars[0];
-  const nuevo = cars.find(c => c.destacado && c.fotos[0] && c !== heroCar) || withPhoto.find(c => c !== heroCar);
+  // Slider de la portada: los coches con «destacado» y foto, en el orden del stock. Sin destacados, una foto fija como antes.
+  const destacados = withPhoto.filter(c => c.destacado);
+  const heroCar = destacados[0] || cars.find(c => c.id === cfg.portada) || withPhoto.find(c => /camper/i.test(c.carroceria)) || withPhoto[0] || cars[0];
+  const slides = destacados.length ? destacados : [heroCar].filter(Boolean);
+  const nuevo = withPhoto.find(c => !slides.includes(c) && c.estado !== "reservado") || withPhoto.find(c => !slides.includes(c));
   const star = cars.find(c => c.id === cfg.joya) || [...withPhoto].sort((a, b) => b.precio - a.precio)[0];
   const brands = [...new Set(cars.map(c => c.marca))];
   const tipos = new Set(cars.map(tipo));
@@ -157,7 +160,12 @@ export function homePage(cars) {
   </div>
   <div class="visual">
     <div class="blob"></div>
-    <div class="main">${imgTag(img0(heroCar), carAlt(heroCar), { eager: true, sizes: SIZES.half })}</div>
+    ${destacados.length ? `<div class="main hs" data-slider>
+      <div class="hs-track" tabindex="0" aria-label="Coches destacados">${slides.map((c, i) => `<a class="hs-slide" href="/coches/${c.id}/" aria-label="${esc(`${title(c)}, ${eur(c.precio)}`)}"${i ? ' aria-hidden="true" tabindex="-1"' : ""}>${imgTag(img0(c), carAlt(c), { eager: !i, sizes: SIZES.half }).replace(' loading="lazy"', "")}
+        <span class="hs-cap"><small>${c.estado === "reservado" ? "Reservado" : "Destacado"}</small><b>${esc(title(c))}</b><span class="pr">${eur(c.precio)}</span></span></a>`).join("")}</div>${slides.length > 1 ? `
+      <button class="gnav prev" type="button" aria-label="Destacado anterior">‹</button><button class="gnav next" type="button" aria-label="Destacado siguiente">›</button>
+      <div class="hs-dots">${slides.map((c, i) => `<button type="button" data-i="${i}" aria-label="Ver ${esc(title(c))}" aria-current="${!i}"></button>`).join("")}</div>` : ""}
+    </div>` : `<div class="main">${imgTag(img0(heroCar), carAlt(heroCar), { eager: true, sizes: SIZES.half })}</div>`}
     <div class="year-badge"><span><b>+${years}</b>años<br>contigo</span></div>
     <div class="float f1"><span class="ic">${I.shield}</span><span><b>Negocio familiar</b><small>En Esparreguera desde ${cfg.desde}</small></span></div>
     ${nuevo ? `<a class="float f2" href="/coches/${nuevo.id}/">${imgTag(img0(nuevo), "", { sizes: SIZES.thumb })}<span><small>Recién llegado</small><b>${esc(title(nuevo))}</b><span class="pr">${eur(nuevo.precio)}</span></span></a>` : ""}
@@ -184,7 +192,7 @@ export function homePage(cars) {
       ${tipos.has("Furgoneta") ? '<button type="button" data-tipo="Furgoneta" aria-pressed="false">Furgo y camper</button>' : ""}
     </div>
     <span class="count" id="count">${cars.length} coches</span>
-    <select id="sort" aria-label="Ordenar"><option value="rel">Destacados</option><option value="pa">Precio: de menor a mayor</option><option value="pd">Precio: de mayor a menor</option><option value="km">Menos kilómetros</option><option value="yr">Más nuevos</option></select>
+    <select id="sort" aria-label="Ordenar"><option value="rel">Últimos llegados</option><option value="pa">Precio: de menor a mayor</option><option value="pd">Precio: de mayor a menor</option><option value="km">Menos kilómetros</option><option value="yr">Más nuevos</option></select>
   </div>
   <div class="grid" id="grid">${cars.map(card).join("\n")}
     <div class="empty" id="empty" hidden>No tenemos ahora un coche así. <a href="${wa("Hola, busco un coche que no está en la web. Os cuento:")}" target="_blank" rel="noopener">Dinos qué buscas</a> y te avisamos cuando entre uno.</div>
@@ -304,6 +312,7 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.gear}</span><span><small>Cambio</small><b>${esc(c.cambio)}</b></span></div>
         <div><span class="ic">${I.bolt}</span><span><small>Potencia</small><b>${c.cv ? `${c.cv} cv` : "Consultar"}</b></span></div>
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
+        ${c.consumo ? `<div class="wide"><span class="ic">${I.drop}</span><span><small>Consumo</small><b>${esc(c.consumo)}</b></span></div>` : ""}
       </div>
       ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Sobre este coche</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
       <div class="acc">

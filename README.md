@@ -4,17 +4,18 @@ Web estática de coches de ocasión. Los coches salen de una Google Sheet: se ed
 
 ## Cómo actualizar los coches
 
-Una fila por coche en la Google Sheet. Columnas:
+Una fila por coche en la Google Sheet. Los coches nuevos se añaden abajo: la web muestra primero las últimas filas (los reservados, al final). Columnas:
 
 | Columna | Valores | Notas |
 | --- | --- | --- |
 | id | `seat-leon-2018` | Opcional. Si se deja vacío se crea con marca, modelo y año. No cambiarlo una vez publicado: es la dirección de la ficha. |
 | estado | disponible / reservado / vendido | Los vendidos desaparecen de la web y su dirección lleva al stock (mejor dejar la fila como "vendido" que borrarla). |
-| destacado | sí / no | Los destacados salen primero. |
+| destacado | sí / no | Salen en el slider de fotos de arriba de la portada (solo los que tienen foto). Sin ninguno, sale una foto fija. No cambian el orden del stock. |
 | marca, modelo, version | SEAT, León, 1.2 TSI Style 110 cv | |
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
+| consumo | `5,2` o texto libre | Opcional. Solo el número = l/100 km (kWh/100 km si es eléctrico). También vale escribirlo entero: `4,8 l/100 km mixto`. Vacío = no sale en la ficha. |
 | fotos | vacío, enlace de una carpeta de Drive, o enlaces separados por espacios | Normalmente vacío: las fotos salen de la carpeta de Drive del coche (ver abajo). Si se pone el enlace de una carpeta, de cada foto o URLs de imágenes, se usan esos. Si no hay nada en Drive, se usan las fotos de `fotos/<id>/` del repositorio. |
 | descripcion | texto libre | Resumen del coche, siempre visible en la ficha y en Google: no poner notas internas. |
 | equipamiento | elementos separados por comas | Sale en la ficha como lista desplegable «Equipamiento». Vacío = el de la web antigua (`data/textos-antiguos.csv`). |
