@@ -141,7 +141,8 @@ async function loadCars() {
     if (t) { c.equipamiento ||= t.equipamiento; c.comentarios ||= t.comentarios; }
   }
   const cars = all.filter(c => c.estado !== "vendido" && c.precio);
-  cars.sort((a, b) => (b.destacado - a.destacado) || (a.estado === "reservado") - (b.estado === "reservado"));
+  // Primero los últimos cargados (las filas de más abajo de la hoja); los reservados, al final.
+  cars.reverse().sort((a, b) => (a.estado === "reservado") - (b.estado === "reservado"));
   return { cars, vendidos: all.filter(c => c.estado === "vendido") };
 }
 

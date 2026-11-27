@@ -4,13 +4,13 @@ Web estática de coches de ocasión. Los coches salen de una Google Sheet: se ed
 
 ## Cómo actualizar los coches
 
-Una fila por coche en la Google Sheet. Columnas:
+Una fila por coche en la Google Sheet. Los coches nuevos se añaden abajo: la web muestra primero las últimas filas (los reservados, al final). Columnas:
 
 | Columna | Valores | Notas |
 | --- | --- | --- |
 | id | `seat-leon-2018` | Opcional. Si se deja vacío se crea con marca, modelo y año. No cambiarlo una vez publicado: es la dirección de la ficha. |
 | estado | disponible / reservado / vendido | Los vendidos desaparecen de la web y su dirección lleva al stock (mejor dejar la fila como "vendido" que borrarla). |
-| destacado | sí / no | Los destacados salen primero. |
+| destacado | sí / no | Ya no se usa: el orden y el «Recién llegado» de la portada salen de la posición en la hoja. |
 | marca, modelo, version | SEAT, León, 1.2 TSI Style 110 cv | |
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |

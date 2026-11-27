@@ -137,7 +137,7 @@ ${body}
 export function homePage(cars) {
   const withPhoto = cars.filter(c => c.fotos[0]);
   const heroCar = cars.find(c => c.id === cfg.portada) || withPhoto.find(c => /camper/i.test(c.carroceria)) || withPhoto[0] || cars[0];
-  const nuevo = cars.find(c => c.destacado && c.fotos[0] && c !== heroCar) || withPhoto.find(c => c !== heroCar);
+  const nuevo = withPhoto.find(c => c !== heroCar && c.estado !== "reservado") || withPhoto.find(c => c !== heroCar);
   const star = cars.find(c => c.id === cfg.joya) || [...withPhoto].sort((a, b) => b.precio - a.precio)[0];
   const brands = [...new Set(cars.map(c => c.marca))];
   const tipos = new Set(cars.map(tipo));
@@ -184,7 +184,7 @@ export function homePage(cars) {
       ${tipos.has("Furgoneta") ? '<button type="button" data-tipo="Furgoneta" aria-pressed="false">Furgo y camper</button>' : ""}
     </div>
     <span class="count" id="count">${cars.length} coches</span>
-    <select id="sort" aria-label="Ordenar"><option value="rel">Destacados</option><option value="pa">Precio: de menor a mayor</option><option value="pd">Precio: de mayor a menor</option><option value="km">Menos kilómetros</option><option value="yr">Más nuevos</option></select>
+    <select id="sort" aria-label="Ordenar"><option value="rel">Últimos llegados</option><option value="pa">Precio: de menor a mayor</option><option value="pd">Precio: de mayor a menor</option><option value="km">Menos kilómetros</option><option value="yr">Más nuevos</option></select>
   </div>
   <div class="grid" id="grid">${cars.map(card).join("\n")}
     <div class="empty" id="empty" hidden>No tenemos ahora un coche así. <a href="${wa("Hola, busco un coche que no está en la web. Os cuento:")}" target="_blank" rel="noopener">Dinos qué buscas</a> y te avisamos cuando entre uno.</div>
