@@ -15,6 +15,7 @@ Una fila por coche en la Google Sheet. Columnas:
 | año, km, cv, precio | números sin puntos ni €| `11500`, no `11.500 €` (aunque también se entiende). |
 | combustible, cambio, carroceria | Gasolina, Manual, Berlina | Alimentan los filtros. Escribirlos siempre igual. |
 | etiqueta | 0 / ECO / C / B / H | H = histórico. |
+| consumo | `5,2` o texto libre | Opcional. Solo el número = l/100 km (kWh/100 km si es eléctrico). También vale escribirlo entero: `4,8 l/100 km mixto`. Vacío = no sale en la ficha. |
 | fotos | vacío, enlace de una carpeta de Drive, o enlaces separados por espacios | Normalmente vacío: las fotos salen de la carpeta de Drive del coche (ver abajo). Si se pone el enlace de una carpeta, de cada foto o URLs de imágenes, se usan esos. Si no hay nada en Drive, se usan las fotos de `fotos/<id>/` del repositorio. |
 | descripcion | texto libre | Resumen del coche, siempre visible en la ficha y en Google: no poner notas internas. |
 | equipamiento | elementos separados por comas | Sale en la ficha como lista desplegable «Equipamiento». Vacío = el de la web antigua (`data/textos-antiguos.csv`). |

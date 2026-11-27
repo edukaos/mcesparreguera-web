@@ -56,6 +56,13 @@ function photoUrl(u) {
   return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1600` : u;
 }
 
+// Consumo: texto libre ("5,2 l/100 km", "4,8 mixto · 6,1 urbano"). Si es solo un número se le añade la unidad.
+function consumo(v, combustible = "") {
+  v = v.trim();
+  if (!/^\d+(?:[.,]\d+)?$/.test(v)) return v;
+  return `${v.replace(".", ",")} ${/el[eé]ctric/i.test(combustible) ? "kWh" : "l"}/100 km`;
+}
+
 const SIL_BY_BODY = { berlina: "berlina", suv: "suv", "todo terreno": "suv", furgoneta: "furgoneta", monovolumen: "furgoneta", coupe: "coupe", "coupé": "coupe", camper: "camper" };
 
 function normalize(r) {
@@ -70,6 +77,7 @@ function normalize(r) {
     combustible: r.combustible, cambio: r.cambio, cv: num(r.cv),
     carroceria: r.carroceria || r["carrocería"] || "",
     etiqueta: (r.etiqueta || "").toUpperCase(),
+    consumo: consumo(r.consumo || r.consumos || "", r.combustible),
     precio: num(r.precio),
     fotos: (r.fotos || "").split(/[\s|]+/).filter(Boolean).map(photoUrl),
     descripcion: r.descripcion || r["descripción"] || "",
@@ -330,7 +338,7 @@ if (esPrincipal) {
   const head = ["id", "title", "description", "availability", "condition", "price", "link", "image_link", "additional_image_link", "brand", "google_product_category"];
   const rows = cars.filter(c => c.img?.length).map(c => {
     const fotos = c.img.map(i => absUrl(i.orig || i.src));
-    const datos = [c.year, c.km != null && `${fmtNum(c.km)} km`, c.combustible, c.cambio, c.cv && `${c.cv} CV`, c.etiqueta && `etiqueta ${c.etiqueta}`].filter(Boolean).join(" · ");
+    const datos = [c.year, c.km != null && `${fmtNum(c.km)} km`, c.combustible, c.cambio, c.cv && `${c.cv} CV`, c.consumo && `consumo ${c.consumo}`, c.etiqueta && `etiqueta ${c.etiqueta}`].filter(Boolean).join(" · ");
     const description = [`${c.marca} ${c.modelo} ${c.version}`.trim() + ".", datos + ".", c.descripcion,
       "Garantía según condiciones de venta. Nos encargamos del cambio de nombre.",
       `Ven a verlo a ${cfg.direccion}, Esparreguera, o escríbenos por WhatsApp al ${cfg.telefono.replace(/(\d{3})(\d{3})(\d{3})/, "$1 $2 $3")}.`]

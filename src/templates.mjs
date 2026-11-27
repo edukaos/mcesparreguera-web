@@ -304,6 +304,7 @@ export function carPage(c, cars) {
         <div><span class="ic">${I.gear}</span><span><small>Cambio</small><b>${esc(c.cambio)}</b></span></div>
         <div><span class="ic">${I.bolt}</span><span><small>Potencia</small><b>${c.cv ? `${c.cv} cv` : "Consultar"}</b></span></div>
         <div><span class="ic">${I.leaf}</span><span><small>Etiqueta DGT</small><b>${dgtTxt}</b></span></div>
+        ${c.consumo ? `<div class="wide"><span class="ic">${I.drop}</span><span><small>Consumo</small><b>${esc(c.consumo)}</b></span></div>` : ""}
       </div>
       ${c.descripcion ? `<div class="desc"><h2 style="font-size:1.5rem;margin-bottom:10px">Sobre este coche</h2><p style="white-space:pre-line;color:var(--muted);max-width:68ch">${esc(c.descripcion)}</p></div>` : ""}
       <div class="acc">
